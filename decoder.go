@@ -7,14 +7,17 @@ import (
 	"strings"
 )
 
+// A Decoder parses cards.
 type Decoder struct {
 	s *bufio.Scanner
 }
 
+// NewDecoder creates a new Decoder reading cards from an io.Reader.
 func NewDecoder(r io.Reader) *Decoder {
 	return &Decoder{s: bufio.NewScanner(r)}
 }
 
+// Decode parses a single card.
 func (dec *Decoder) Decode() (Card, error) {
 	card := make(Card)
 
