@@ -28,11 +28,14 @@ func (dec *Decoder) Decode() (Card, error) {
 			continue
 		}
 
-		k, v, params := parseLine(l)
+		k, f, err := parseLine(l)
+		if err != nil {
+			continue
+		}
 
 		if !hasHeader {
 			if k == "BEGIN" {
-				if strings.ToUpper(v) != "VCARD" {
+				if strings.ToUpper(f.Value) != "VCARD" {
 					return card, errors.New("vcard: invalid BEGIN value")
 				}
 				hasHeader = true
@@ -41,39 +44,50 @@ func (dec *Decoder) Decode() (Card, error) {
 				return card, errors.New("vcard: no BEGIN field found")
 			}
 		} else if k == "END" {
-			if strings.ToUpper(v) != "VCARD" {
+			if strings.ToUpper(f.Value) != "VCARD" {
 				return card, errors.New("vcard: invalid END value")
 			}
 			break
 		}
 
-		card[k] = append(card[k], &Field{
-			Value: v,
-			Params: params,
-		})
+		card[k] = append(card[k], f)
 	}
 
 	return card, dec.s.Err()
 }
 
-func parseLine(l string) (k, v string, params map[string]string) {
+func parseLine(l string) (key string, field *Field, err error) {
 	kv := strings.SplitN(l, ":", 2)
 	if len(kv) < 2 {
-		return l, "", nil
+		return l, nil, errors.New("vcard: invalid field")
 	}
 
-	v = kv[1]
+	field = new(Field)
+	field.Value = kv[1]
 	kparams := strings.Split(kv[0], ";")
-	k = strings.ToUpper(kparams[0])
+
+	key, field.Group = parseKey(kparams[0])
 
 	if len(kparams) > 1 {
-		params = make(map[string]string)
+		field.Params = make(map[string]string)
 		for i := 1; i < len(kparams); i++ {
 			pk, pv := parseParam(kparams[i])
-			params[pk] = pv
+			field.Params[pk] = pv
 		}
 	}
 
+	return
+}
+
+func parseKey(s string) (key, group string) {
+	parts := strings.SplitN(s, ".", 2)
+	if len(parts) < 2 {
+		key = s
+	} else {
+		group = parts[0]
+		key = parts[1]
+	}
+	key = strings.ToUpper(key)
 	return
 }
 

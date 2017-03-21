@@ -29,6 +29,7 @@ func (c Card) Get(k string) *Field {
 type Field struct {
 	Value string
 	Params map[string]string
+	Group string
 }
 
 type Name struct {
@@ -39,6 +40,7 @@ type Name struct {
 	HonorificSuffix string
 
 	Params map[string]string
+	Group string
 }
 
 func newName(field *Field) *Name {
@@ -50,6 +52,7 @@ func newName(field *Field) *Name {
 		maybeGet(components, 3),
 		maybeGet(components, 4),
 		field.Params,
+		field.Group,
 	}
 }
 

@@ -23,7 +23,7 @@ func (enc *Encoder) Encode(c Card) error {
 	}
 
 	version := c.Get("VERSION")
-	if _, err := io.WriteString(enc.w, formatLine("VERSION", version.Value, version.Params)+"\r\n"); err != nil {
+	if _, err := io.WriteString(enc.w, formatLine("VERSION", version)+"\r\n"); err != nil {
 		return err
 	}
 
@@ -32,7 +32,7 @@ func (enc *Encoder) Encode(c Card) error {
 			continue
 		}
 		for _, f := range fields {
-			if _, err := io.WriteString(enc.w, formatLine(k, f.Value, f.Params)+"\r\n"); err != nil {
+			if _, err := io.WriteString(enc.w, formatLine(k, f)+"\r\n"); err != nil {
 				return err
 			}
 		}
@@ -43,16 +43,20 @@ func (enc *Encoder) Encode(c Card) error {
 	return err
 }
 
-func formatLine(k, v string, params map[string]string) string {
-	kparams := make([]string, 1 + len(params))
-	kparams[0] = k
-	i := 1
-	for pk, pv := range params {
-		kparams[i] = formatParam(pk, pv)
-		i++
+func formatLine(key string, field *Field) string {
+	var s string
+
+	if field.Group != "" {
+		s += field.Group + "."
+	}
+	s += key
+
+	for pk, pv := range field.Params {
+		s += ";" + formatParam(pk, pv)
 	}
 
-	return strings.Join(kparams, ";")+":"+v
+	s += ":" + field.Value
+	return s
 }
 
 func formatParam(k, v string) string {
