@@ -1,3 +1,4 @@
+// Package vcard implements the vCard format, defined in RFC 6350.
 package vcard
 
 // A Card is an address book entry.
