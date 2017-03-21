@@ -26,9 +26,7 @@ func TestCard(t *testing.T) {
 		Params: map[string]string{"PID": "1.1"},
 	}
 
-	if v, params := testCard.Get("FN"); v != "J. Doe" {
-		t.Errorf("Expected card FN field value to be %q but got %q", testCardFullName.Value, v)
-	} else if !reflect.DeepEqual(testCardFullName.Params, params) {
-		t.Errorf("Expected card FN field params to be %v but got %v", testCardFullName.Params, params)
+	if field := testCard.Get("FN"); !reflect.DeepEqual(testCardFullName, field) {
+		t.Errorf("Expected card FN field to be %v but got %v", testCardFullName, field)
 	}
 }

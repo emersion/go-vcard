@@ -27,18 +27,26 @@ func (dec *Decoder) Decode() (Card, error) {
 		if l == "" {
 			continue
 		}
+
+		k, v, params := parseLine(l)
+
 		if !hasHeader {
-			if l == "BEGIN:VCARD" {
+			if k == "BEGIN" {
+				if strings.ToUpper(v) != "VCARD" {
+					return card, errors.New("vcard: invalid BEGIN value")
+				}
 				hasHeader = true
 				continue
 			} else {
-				return card, errors.New("vcard: no header found")
+				return card, errors.New("vcard: no BEGIN field found")
 			}
-		} else if l == "END:VCARD" {
+		} else if k == "END" {
+			if strings.ToUpper(v) != "VCARD" {
+				return card, errors.New("vcard: invalid END value")
+			}
 			break
 		}
 
-		k, v, params := parseLine(l)
 		card[k] = append(card[k], &Field{
 			Value: v,
 			Params: params,
