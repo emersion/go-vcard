@@ -190,10 +190,10 @@ func (c Card) Name() *Name {
 }
 
 // Gender returns this card's gender.
-func (c Card) Gender() Gender {
+func (c Card) Gender() (sex Sex, identity string) {
 	v := c.Value(FieldKind)
 	parts := strings.SplitN(v, ";", 2)
-	return Gender(strings.ToLower(parts[0]))
+	return Sex(strings.ToLower(parts[0])), maybeGet(parts, 1)
 }
 
 // A field contains a value and some parameters.
@@ -245,15 +245,14 @@ func newName(field *Field) *Name {
 	}
 }
 
-// Gender is an object's gender.
-type Gender string
+// Sex is an object's biological sex.
+type Sex string
 
-// Values for FieldGender.
 const (
-	GenderUnspecified Gender = ""
-	GenderFemale = "F"
-	GenderMale = "M"
-	GenderOther = "O"
-	GenderNone = "N"
-	GenderUnknown = "U"
+	SexUnspecified Sex = ""
+	SexFemale = "F"
+	SexMale = "M"
+	SexOther = "O"
+	SexNone = "N"
+	SexUnknown = "U"
 )
