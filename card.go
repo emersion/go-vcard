@@ -4,7 +4,10 @@ package vcard
 import (
 	"strconv"
 	"strings"
+	"time"
 )
+
+const timestampLayout = "20060102T150405Z"
 
 // Card property parameters.
 const (
@@ -111,7 +114,7 @@ func (c Card) Preferred(k string) *Field {
 		n := 0
 		if pref := f.Params.Get(ParamPreferred); pref != "" {
 			n, _ = strconv.Atoi(pref)
-		} else if f.Params.HasValue(ParamType, "pref") {
+		} else if f.Params.HasType("pref") {
 			// Apple Contacts adds "pref" to the TYPE param
 			n = 1
 		}
@@ -208,6 +211,44 @@ func (c Card) Gender() (sex Sex, identity string) {
 	return Sex(strings.ToLower(parts[0])), maybeGet(parts, 1)
 }
 
+// Addresses returns addresses of the card.
+func (c Card) Addresses() []*Address {
+	adrs := c[FieldAddress]
+	if adrs == nil {
+		return nil
+	}
+
+	addresses := make([]*Address, len(adrs))
+	for i, adr := range adrs {
+		addresses[i] = newAddress(adr)
+	}
+	return addresses
+}
+
+// Address returns the preferred address of the card. If it isn't specified, it
+// returns nil.
+func (c Card) Address() *Address {
+	adr := c.Preferred(FieldAddress)
+	if adr == nil {
+		return nil
+	}
+	return newAddress(adr)
+}
+
+// Categories returns category information about the card, also known as "tags".
+func (c Card) Categories() []string {
+	return strings.Split(c.PreferredValue(FieldCategories), ",")
+}
+
+// Revision returns revision information about the current card.
+func (c Card) Revision() (time.Time, error) {
+	rev := c.Value(FieldRevision)
+	if rev == "" {
+		return time.Time{}, nil
+	}
+	return time.Parse(timestampLayout, rev)
+}
+
 // A field contains a value and some parameters.
 type Field struct {
 	Value string
@@ -228,10 +269,20 @@ func (p Params) Get(k string) string {
 	return values[0]
 }
 
-// HasValue returns true if and only if the key k has a value v.
-func (p Params) HasValue(k, v string) bool {
-	for _, vv := range p[k] {
-		if v == vv {
+// Types returns the field types.
+func (p Params) Types() []string {
+	types := p[ParamType]
+	list := make([]string, len(types))
+	for i, t := range types {
+		list[i] = strings.ToLower(t)
+	}
+	return list
+}
+
+// HasType returns true if and only if the field have the provided type.
+func (p Params) HasType(t string) bool {
+	for _, tt := range p[ParamType] {
+		if strings.EqualFold(t, tt) {
 			return true
 		}
 	}
@@ -251,32 +302,62 @@ const (
 
 // Values for ParamType.
 const (
+	// Generic
 	TypeHome = "home"
 	TypeWork = "work"
+
+	// For FieldTelephone
+	TypeText = "text"
+	TypeVoice = "voice" // Default
+	TypeFax = "fax"
+	TypeCell = "cell"
+	TypeVideo = "video"
+	TypePager = "pager"
+	TypeTextPhone = "textphone"
+
+	// For FieldRelated
+	TypeContact = "contact"
+	TypeAcquaintance = "acquaintance"
+	TypeFriend = "friend"
+	TypeMet = "met"
+	TypeCoWorker = "co-worker"
+	TypeColleague = "colleague"
+	TypeCoResident = "co-resident"
+	TypeNeighbor = "neighbor"
+	TypeChild = "child"
+	TypeParent = "parent"
+	TypeSibling = "sibling"
+	TypeSpouse = "spouse"
+	TypeKin = "kin"
+	TypeMuse = "muse"
+	TypeCrush = "crush"
+	TypeDate = "date"
+	TypeSweetheart = "sweetheart"
+	TypeMe = "me"
+	TypeAgent = "agent"
+	TypeEmergency = "emergency"
 )
 
 // Name contains an object's name components.
 type Name struct {
+	*Field
+
 	FamilyName string
 	GivenName string
 	AdditionalName string
 	HonorificPrefix string
 	HonorificSuffix string
-
-	Params Params
-	Group string
 }
 
 func newName(field *Field) *Name {
 	components := strings.Split(field.Value, ";")
 	return &Name{
+		field,
 		maybeGet(components, 0),
 		maybeGet(components, 1),
 		maybeGet(components, 2),
 		maybeGet(components, 3),
 		maybeGet(components, 4),
-		field.Params,
-		field.Group,
 	}
 }
 
@@ -291,3 +372,30 @@ const (
 	SexNone = "N"
 	SexUnknown = "U"
 )
+
+// An Address is a delivery address.
+type Address struct {
+	*Field
+
+	PostOfficeBox string
+	ExtendedAddress string // e.g., apartment or suite number
+	StreetAddress string
+	Locality string // e.g., city
+	Region string // e.g., state or province
+	PostalCode string
+	Country string
+}
+
+func newAddress(field *Field) *Address {
+	components := strings.Split(field.Value, ";")
+	return &Address{
+		field,
+		maybeGet(components, 0),
+		maybeGet(components, 1),
+		maybeGet(components, 2),
+		maybeGet(components, 3),
+		maybeGet(components, 4),
+		maybeGet(components, 5),
+		maybeGet(components, 6),
+	}
+}

@@ -112,11 +112,7 @@ var testCardApple = Card{
 }
 
 func TestCard(t *testing.T) {
-	testCardFullName := &Field{
-		Value: "J. Doe",
-		Params: Params{"PID": {"1.1"}},
-	}
-
+	testCardFullName := testCard["FN"][0]
 	if field := testCard.Get(FieldFormattedName); !reflect.DeepEqual(testCardFullName, field) {
 		t.Errorf("Expected card FN field to be %+v but got %+v", testCardFullName, field)
 	}
@@ -125,6 +121,7 @@ func TestCard(t *testing.T) {
 	}
 
 	testCardName := &Name{
+		Field: testCard["N"][0],
 		FamilyName: "Doe",
 		GivenName: "J.",
 	}
