@@ -2,6 +2,7 @@
 package vcard
 
 import (
+	"strconv"
 	"strings"
 )
 
@@ -104,12 +105,18 @@ func (c Card) Preferred(k string) *Field {
 		return nil
 	}
 
+	field := fields[0]
+	max := 0
 	for _, f := range fields {
-		if f.Params.Get(ParamPreferred) == "1" {
-			return f
+		pref := f.Params.Get(ParamPreferred)
+		if pref != "" {
+			if n, err := strconv.Atoi(pref); err == nil && n > max {
+				max = n
+				field = f
+			}
 		}
 	}
-	return fields[0]
+	return field
 }
 
 // Value returns the first field value of the card for the given property. If
