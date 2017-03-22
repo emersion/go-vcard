@@ -20,13 +20,115 @@ var testCard = Card{
 	"CLIENTPIDMAP": []*Field{{Value: "1;urn:uuid:53e374d9-337e-4727-8803-a1e9c14e0556"}},
 }
 
+var testCardHandmade = Card{
+	"VERSION": []*Field{{Value: "4.0"}},
+	"N": []*Field{{Value: "Bloggs;Joe;;;"}},
+	"FN": []*Field{{Value: "Joe Bloggs"}},
+	"EMAIL": []*Field{{
+		Value: "me@joebloggs.com",
+		Params: map[string]string{"TYPE": "home", "PREF": "1"},
+	}},
+	"TEL": []*Field{{
+		Value: "tel:+44 20 1234 5678",
+		Params: map[string]string{"TYPE": "\"cell,home\"", "PREF": "1"},
+	}},
+	"ADR": []*Field{{
+		Value: ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
+		Params: map[string]string{"TYPE": "home", "PREF": "1"},
+	}},
+	"URL": []*Field{{
+		Value: "http://joebloggs.com",
+		Params: map[string]string{"TYPE": "home", "PREF": "1"},
+	}},
+	"IMPP": []*Field{{
+		Value: "skype:joe.bloggs",
+		Params: map[string]string{"TYPE": "home", "PREF": "1"},
+	}},
+	"X-SOCIALPROFILE": []*Field{{
+		Value: "twitter:https://twitter.com/joebloggs",
+		Params: map[string]string{"TYPE": "home", "PREF": "1"},
+	}},
+}
+
+var testCardGoogle = Card{
+	"VERSION": []*Field{{Value: "3.0"}},
+	"N": []*Field{{Value: "Bloggs;Joe;;;"}},
+	"FN": []*Field{{Value: "Joe Bloggs"}},
+	"EMAIL": []*Field{{
+		Value: "me@joebloggs.com",
+		Params: map[string]string{"TYPE": "HOME"},
+	}},
+	"TEL": []*Field{{
+		Value: "+44 20 1234 5678",
+		Params: map[string]string{"TYPE": "CELL"},
+	}},
+	"ADR": []*Field{{
+		Value: ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
+		Params: map[string]string{"TYPE": "HOME"},
+	}},
+	"URL": []*Field{
+		{Value: "http\\://joebloggs.com", Group: "item1"},
+		{Value: "http\\://twitter.com/test", Group: "item2"},
+	},
+	"X-SKYPE": []*Field{{Value: "joe.bloggs"}},
+	"X-ABLABEL": []*Field{
+		{Value: "_$!<HomePage>!$_", Group: "item1"},
+		{Value: "Twitter", Group: "item2"},
+	},
+}
+
+var testCardApple = Card{
+	"VERSION": []*Field{{Value: "3.0"}},
+	"N": []*Field{{Value: "Bloggs;Joe;;;"}},
+	"FN": []*Field{{Value: "Joe Bloggs"}},
+	"EMAIL": []*Field{{
+		Value: "me@joebloggs.com",
+		Params: map[string]string{"TYPE": "pref"},
+	}},
+	"TEL": []*Field{{
+		Value: "+44 20 1234 5678",
+		Params: map[string]string{"TYPE": "pref"},
+	}},
+	"ADR": []*Field{{
+		Value: ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
+		Params: map[string]string{"TYPE": "pref"},
+	}},
+	"URL": []*Field{{
+		Value: "http://joebloggs.com",
+		Params: map[string]string{"TYPE": "pref"},
+		Group: "item1",
+	}},
+	"X-ABLABEL": []*Field{
+		{Value: "_$!<HomePage>!$_", Group: "item1"},
+	},
+	"IMPP": []*Field{{
+		Value: "skype:joe.bloggs",
+		Params: map[string]string{"X-SERVICE-TYPE": "Skype", "TYPE": "pref"},
+	}},
+	"X-SOCIALPROFILE": []*Field{{
+		Value: "https://twitter.com/joebloggs",
+		Params: map[string]string{"TYPE": "twitter"},
+	}},
+}
+
 func TestCard(t *testing.T) {
 	testCardFullName := &Field{
 		Value: "J. Doe",
 		Params: map[string]string{"PID": "1.1"},
 	}
 
-	if field := testCard.Get("FN"); !reflect.DeepEqual(testCardFullName, field) {
+	if field := testCard.Get(FieldFormattedName); !reflect.DeepEqual(testCardFullName, field) {
 		t.Errorf("Expected card FN field to be %v but got %v", testCardFullName, field)
+	}
+	if v := testCard.Value(FieldFormattedName); v != testCardFullName.Value {
+		t.Errorf("Expected card FN field to be %q but got %q", testCardFullName.Value, v)
+	}
+
+	testCardName := &Name{
+		FamilyName: "Doe",
+		GivenName: "J.",
+	}
+	if name := testCard.Name(); !reflect.DeepEqual(testCardName, name) {
+		t.Errorf("Expected card name to be %v but got %v", testCardName, name)
 	}
 }
