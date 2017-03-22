@@ -101,6 +101,17 @@ func (c Card) Get(k string) *Field {
 	return fields[0]
 }
 
+// Add adds the k, f pair to the list of fields. It appends to any existing
+// fields.
+func (c Card) Add(k string, f *Field) {
+	c[k] = append(c[k], f)
+}
+
+// Set sets the key k to the single field f. It replaces any existing field.
+func (c Card) Set(k string, f *Field) {
+	c[k] = []*Field{f}
+}
+
 // Preferred returns the preferred field of the card for the given property.
 func (c Card) Preferred(k string) *Field {
 	fields := c[k]
@@ -137,6 +148,18 @@ func (c Card) Value(k string) string {
 	return f.Value
 }
 
+// AddValue adds the k, v pair to the list of field values. It appends to any
+// existing values.
+func (c Card) AddValue(k, v string) {
+	c.Add(k, &Field{Value: v})
+}
+
+// SetValue sets the field k to the single value v. It replaces any existing
+// value.
+func (c Card) SetValue(k, v string) {
+	c.Set(k, &Field{Value: v})
+}
+
 // PreferredValue returns the preferred field value of the card.
 func (c Card) PreferredValue(k string) string {
 	f := c.Preferred(k)
@@ -168,6 +191,11 @@ func (c Card) Kind() Kind {
 		return KindIndividual
 	}
 	return Kind(kind)
+}
+
+// SetKind sets the kind of the object represented by this card.
+func (c Card) SetKind(kind Kind) {
+	c.SetValue(FieldKind, string(kind))
 }
 
 // FormattedNames returns formatted names of the card. The length of the result
@@ -204,11 +232,25 @@ func (c Card) Name() *Name {
 	return newName(n)
 }
 
+// AddName adds the specified name to the list of names.
+func (c Card) AddName(name *Name) {
+	c.Add(FieldName, name.field())
+}
+
 // Gender returns this card's gender.
 func (c Card) Gender() (sex Sex, identity string) {
-	v := c.Value(FieldKind)
+	v := c.Value(FieldGender)
 	parts := strings.SplitN(v, ";", 2)
 	return Sex(strings.ToLower(parts[0])), maybeGet(parts, 1)
+}
+
+// SetGender sets this card's gender.
+func (c Card) SetGender(sex Sex, identity string) {
+	v := string(sex)
+	if identity != "" {
+		v += ";" + identity
+	}
+	c.SetValue(FieldGender, v)
 }
 
 // Addresses returns addresses of the card.
@@ -235,9 +277,19 @@ func (c Card) Address() *Address {
 	return newAddress(adr)
 }
 
+// AddAddress adds an address to the list of addresses.
+func (c Card) AddAddress(address *Address) {
+	c.Add(FieldAddress, address.field())
+}
+
 // Categories returns category information about the card, also known as "tags".
 func (c Card) Categories() []string {
 	return strings.Split(c.PreferredValue(FieldCategories), ",")
+}
+
+// SetCategories sets category information about the card.
+func (c Card) SetCategories(categories []string) {
+	c.SetValue(FieldCategories, strings.Join(categories, ","))
 }
 
 // Revision returns revision information about the current card.
@@ -247,6 +299,11 @@ func (c Card) Revision() (time.Time, error) {
 		return time.Time{}, nil
 	}
 	return time.Parse(timestampLayout, rev)
+}
+
+// SetRevision sets revision information about the current card.
+func (c Card) SetRevision(t time.Time) {
+	c.SetValue(FieldRevision, t.Format(timestampLayout))
 }
 
 // A field contains a value and some parameters.
@@ -267,6 +324,18 @@ func (p Params) Get(k string) string {
 		return ""
 	}
 	return values[0]
+}
+
+// Add adds the k, v pair to the list of parameters. It appends to any existing
+// values.
+func (p Params) Add(k, v string) {
+	p[k] = append(p[k], v)
+}
+
+// Set sets the parameter k to the single value v. It replaces any existing
+// value.
+func (p Params) Set(k, v string) {
+	p[k] = []string{v}
 }
 
 // Types returns the field types.
@@ -361,6 +430,17 @@ func newName(field *Field) *Name {
 	}
 }
 
+func (n *Name) field() *Field {
+	n.Field.Value = strings.Join([]string{
+		n.FamilyName,
+		n.GivenName,
+		n.AdditionalName,
+		n.HonorificPrefix,
+		n.HonorificSuffix,
+	}, ";")
+	return n.Field
+}
+
 // Sex is an object's biological sex.
 type Sex string
 
@@ -398,4 +478,17 @@ func newAddress(field *Field) *Address {
 		maybeGet(components, 5),
 		maybeGet(components, 6),
 	}
+}
+
+func (a *Address) field() *Field {
+	a.Field.Value = strings.Join([]string{
+		a.PostOfficeBox,
+		a.ExtendedAddress,
+		a.StreetAddress,
+		a.Locality,
+		a.Region,
+		a.PostalCode,
+		a.Country,
+	}, ";")
+	return a.Field
 }
