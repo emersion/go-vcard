@@ -179,8 +179,8 @@ func (c Card) Names() []*Name {
 	return names
 }
 
-// Name returns the first name of the card. If it isn't specified, it returns
-// nil.
+// Name returns the preferred name of the card. If it isn't specified, it
+// returns nil.
 func (c Card) Name() *Name {
 	n := c.Preferred(FieldName)
 	if n == nil {
