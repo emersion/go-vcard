@@ -109,6 +109,21 @@ func (c Card) Get(k string) *Field {
 	return fields[0]
 }
 
+// Preferred returns the preferred field of the card.
+func (c Card) Preferred(k string) *Field {
+	fields := c[k]
+	if len(fields) == 0 {
+		return nil
+	}
+
+	for _, f := range fields {
+		if f.Params[ParamPreferred] == "1" {
+			return f
+		}
+	}
+	return fields[0]
+}
+
 // Value returns the first field value of the card. If there is no such field,
 // it returns an empty string.
 func (c Card) Value(k string) string {
@@ -177,6 +192,11 @@ const (
 	KindGroup = "group"
 	KindOrg = "org"
 	KindLocation = "location"
+)
+
+const (
+	TypeHome = "home"
+	TypeWork = "work"
 )
 
 type Name struct {

@@ -118,7 +118,7 @@ func TestCard(t *testing.T) {
 	}
 
 	if field := testCard.Get(FieldFormattedName); !reflect.DeepEqual(testCardFullName, field) {
-		t.Errorf("Expected card FN field to be %v but got %v", testCardFullName, field)
+		t.Errorf("Expected card FN field to be %+v but got %+v", testCardFullName, field)
 	}
 	if v := testCard.Value(FieldFormattedName); v != testCardFullName.Value {
 		t.Errorf("Expected card FN field to be %q but got %q", testCardFullName.Value, v)
@@ -129,6 +129,25 @@ func TestCard(t *testing.T) {
 		GivenName: "J.",
 	}
 	if name := testCard.Name(); !reflect.DeepEqual(testCardName, name) {
-		t.Errorf("Expected card name to be %v but got %v", testCardName, name)
+		t.Errorf("Expected card name to be %+v but got %+v", testCardName, name)
+	}
+}
+
+func TestCard_Preferred(t *testing.T) {
+	card := Card{
+		"EMAIL": []*Field{
+			{
+				Value: "me@example.org",
+				Params: map[string]string{"TYPE": "home"},
+			},
+			{
+				Value: "me@example.com",
+				Params: map[string]string{"TYPE": "work", "PREF": "1"},
+			},
+		},
+	}
+
+	if pref := card.Preferred(FieldEmail); pref != card["EMAIL"][1] {
+		t.Errorf("Expected card preferred email to be %+v but got %+v", card["EMAIL"][1], pref)
 	}
 }
