@@ -84,23 +84,11 @@ func maybeGet(l []string, i int) string {
 	return ""
 }
 
-func fieldValues(fields []*Field) []string {
-	if fields == nil {
-		return nil
-	}
-
-	values := make([]string, len(fields))
-	for i, f := range fields {
-		values[i] = f.Value
-	}
-	return values
-}
-
 // A Card is an address book entry.
 type Card map[string][]*Field
 
-// Get returns the first field of the card. If there is no such field, it
-// returns nil.
+// Get returns the first field of the card for the given property. If there is
+// no such field, it returns nil.
 func (c Card) Get(k string) *Field {
 	fields := c[k]
 	if len(fields) == 0 {
@@ -109,7 +97,7 @@ func (c Card) Get(k string) *Field {
 	return fields[0]
 }
 
-// Preferred returns the preferred field of the card.
+// Preferred returns the preferred field of the card for the given property.
 func (c Card) Preferred(k string) *Field {
 	fields := c[k]
 	if len(fields) == 0 {
@@ -124,8 +112,8 @@ func (c Card) Preferred(k string) *Field {
 	return fields[0]
 }
 
-// Value returns the first field value of the card. If there is no such field,
-// it returns an empty string.
+// Value returns the first field value of the card for the given property. If
+// there is no such field, it returns an empty string.
 func (c Card) Value(k string) string {
 	f := c.Get(k)
 	if f == nil {
@@ -143,16 +131,28 @@ func (c Card) PreferredValue(k string) string {
 	return f.Value
 }
 
-// Sources return a list of sources of directory information contained in the
-// content type.
-func (c Card) Sources() []string {
-	return fieldValues(c[FieldSource])
+// Values returns a list of values for a given property.
+func (c Card) Values(k string) []string {
+	fields := c[k]
+	if fields == nil {
+		return nil
+	}
+
+	values := make([]string, len(fields))
+	for i, f := range fields {
+		values[i] = f.Value
+	}
+	return values
 }
 
 // Kind returns the kind of the object represented by this card. If it isn't
-// specified, it returns an empty string. The default is KindIndividual.
-func (c Card) Kind() string {
-	return strings.ToLower(c.Value(FieldKind))
+// specified, it returns the default: KindIndividual.
+func (c Card) Kind() Kind {
+	kind := strings.ToLower(c.Value(FieldKind))
+	if kind == "" {
+		return KindIndividual
+	}
+	return Kind(kind)
 }
 
 // FormattedNames returns formatted names of the card. The length of the result
@@ -189,6 +189,13 @@ func (c Card) Name() *Name {
 	return newName(n)
 }
 
+// Gender returns this card's gender.
+func (c Card) Gender() Gender {
+	v := c.Value(FieldKind)
+	parts := strings.SplitN(v, ";", 2)
+	return Gender(strings.ToLower(parts[0]))
+}
+
 // A field contains a value and some parameters.
 type Field struct {
 	Value string
@@ -196,18 +203,24 @@ type Field struct {
 	Group string
 }
 
+// Kind is an object's kind.
+type Kind string
+
+// Values for FieldKind.
 const (
-	KindIndividual = "individual"
+	KindIndividual Kind = "individual"
 	KindGroup = "group"
 	KindOrg = "org"
 	KindLocation = "location"
 )
 
+// Values for ParamType.
 const (
 	TypeHome = "home"
 	TypeWork = "work"
 )
 
+// Name contains an object's name components.
 type Name struct {
 	FamilyName string
 	GivenName string
@@ -232,10 +245,13 @@ func newName(field *Field) *Name {
 	}
 }
 
+// Gender is an object's gender.
 type Gender string
 
+// Values for FieldGender.
 const (
-	GenderFemale Gender = "F"
+	GenderUnspecified Gender = ""
+	GenderFemale = "F"
 	GenderMale = "M"
 	GenderOther = "O"
 	GenderNone = "N"
