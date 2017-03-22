@@ -7,6 +7,12 @@ import (
 	"time"
 )
 
+// MIME type and file extension for VCard, defined in RFC 6350 section 10.1.
+const (
+	MIMEType = "text/vcard"
+	Extension = "vcf"
+)
+
 const timestampLayout = "20060102T150405Z"
 
 // Card property parameters.
