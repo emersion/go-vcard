@@ -150,4 +150,7 @@ func TestCard_Preferred(t *testing.T) {
 	if pref := card.Preferred(FieldEmail); pref != card["EMAIL"][1] {
 		t.Errorf("Expected card preferred email to be %+v but got %+v", card["EMAIL"][1], pref)
 	}
+	if v := card.PreferredValue(FieldEmail); v != "me@example.com" {
+		t.Errorf("Expected card preferred email to be %q but got %q", "me@example.com", v)
+	}
 }

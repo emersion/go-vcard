@@ -134,6 +134,15 @@ func (c Card) Value(k string) string {
 	return f.Value
 }
 
+// PreferredValue returns the preferred field value of the card.
+func (c Card) PreferredValue(k string) string {
+	f := c.Preferred(k)
+	if f == nil {
+		return ""
+	}
+	return f.Value
+}
+
 // Sources return a list of sources of directory information contained in the
 // content type.
 func (c Card) Sources() []string {
@@ -149,7 +158,7 @@ func (c Card) Kind() string {
 // FormattedNames returns formatted names of the card. The length of the result
 // is always greater or equal to 1.
 func (c Card) FormattedNames() []*Field {
-	fns := c["FN"]
+	fns := c[FieldFormattedName]
 	if len(fns) == 0 {
 		return []*Field{{Value: ""}}
 	}
@@ -158,7 +167,7 @@ func (c Card) FormattedNames() []*Field {
 
 // Names returns names of the card.
 func (c Card) Names() []*Name {
-	ns := c["N"]
+	ns := c[FieldName]
 	if ns == nil {
 		return nil
 	}
@@ -173,7 +182,7 @@ func (c Card) Names() []*Name {
 // Name returns the first name of the card. If it isn't specified, it returns
 // nil.
 func (c Card) Name() *Name {
-	n := c.Get("N")
+	n := c.Preferred(FieldName)
 	if n == nil {
 		return nil
 	}
