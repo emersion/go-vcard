@@ -105,7 +105,7 @@ func (c Card) Preferred(k string) *Field {
 	}
 
 	for _, f := range fields {
-		if f.Params[ParamPreferred] == "1" {
+		if f.Params.Get(ParamPreferred) == "1" {
 			return f
 		}
 	}
@@ -199,8 +199,21 @@ func (c Card) Gender() (sex Sex, identity string) {
 // A field contains a value and some parameters.
 type Field struct {
 	Value string
-	Params map[string]string
+	Params Params
 	Group string
+}
+
+// Params is a set of field parameters.
+type Params map[string][]string
+
+// Get returns the first value with the key k. It returns an empty string if
+// there is no such value.
+func (p Params) Get(k string) string {
+	values := p[k]
+	if len(values) == 0 {
+		return ""
+	}
+	return values[0]
 }
 
 // Kind is an object's kind.
@@ -228,7 +241,7 @@ type Name struct {
 	HonorificPrefix string
 	HonorificSuffix string
 
-	Params map[string]string
+	Params Params
 	Group string
 }
 

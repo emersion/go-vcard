@@ -10,12 +10,12 @@ var testCard = Card{
 	"UID": []*Field{{Value: "urn:uuid:4fbe8971-0bc3-424c-9c26-36c3e1eff6b1"}},
 	"FN": []*Field{{
 		Value: "J. Doe",
-		Params: map[string]string{"PID": "1.1"},
+		Params: Params{"PID": {"1.1"}},
 	}},
 	"N": []*Field{{Value: "Doe;J.;;;"}},
 	"EMAIL": []*Field{{
 		Value: "jdoe@example.com",
-		Params: map[string]string{"PID": "1.1"},
+		Params: Params{"PID": {"1.1"}},
 	}},
 	"CLIENTPIDMAP": []*Field{{Value: "1;urn:uuid:53e374d9-337e-4727-8803-a1e9c14e0556"}},
 }
@@ -26,27 +26,27 @@ var testCardHandmade = Card{
 	"FN": []*Field{{Value: "Joe Bloggs"}},
 	"EMAIL": []*Field{{
 		Value: "me@joebloggs.com",
-		Params: map[string]string{"TYPE": "home", "PREF": "1"},
+		Params: Params{"TYPE": {"home"}, "PREF": {"1"}},
 	}},
 	"TEL": []*Field{{
 		Value: "tel:+44 20 1234 5678",
-		Params: map[string]string{"TYPE": "\"cell,home\"", "PREF": "1"},
+		Params: Params{"TYPE": {"\"cell,home\""}, "PREF": {"1"}},
 	}},
 	"ADR": []*Field{{
 		Value: ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
-		Params: map[string]string{"TYPE": "home", "PREF": "1"},
+		Params: Params{"TYPE": {"home"}, "PREF": {"1"}},
 	}},
 	"URL": []*Field{{
 		Value: "http://joebloggs.com",
-		Params: map[string]string{"TYPE": "home", "PREF": "1"},
+		Params: Params{"TYPE": {"home"}, "PREF": {"1"}},
 	}},
 	"IMPP": []*Field{{
 		Value: "skype:joe.bloggs",
-		Params: map[string]string{"TYPE": "home", "PREF": "1"},
+		Params: Params{"TYPE": {"home"}, "PREF": {"1"}},
 	}},
 	"X-SOCIALPROFILE": []*Field{{
 		Value: "twitter:https://twitter.com/joebloggs",
-		Params: map[string]string{"TYPE": "home", "PREF": "1"},
+		Params: Params{"TYPE": {"home"}, "PREF": {"1"}},
 	}},
 }
 
@@ -56,15 +56,15 @@ var testCardGoogle = Card{
 	"FN": []*Field{{Value: "Joe Bloggs"}},
 	"EMAIL": []*Field{{
 		Value: "me@joebloggs.com",
-		Params: map[string]string{"TYPE": "HOME"},
+		Params: Params{"TYPE": {"INTERNET", "HOME"}},
 	}},
 	"TEL": []*Field{{
 		Value: "+44 20 1234 5678",
-		Params: map[string]string{"TYPE": "CELL"},
+		Params: Params{"TYPE": {"CELL"}},
 	}},
 	"ADR": []*Field{{
 		Value: ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
-		Params: map[string]string{"TYPE": "HOME"},
+		Params: Params{"TYPE": {"HOME"}},
 	}},
 	"URL": []*Field{
 		{Value: "http\\://joebloggs.com", Group: "item1"},
@@ -83,19 +83,19 @@ var testCardApple = Card{
 	"FN": []*Field{{Value: "Joe Bloggs"}},
 	"EMAIL": []*Field{{
 		Value: "me@joebloggs.com",
-		Params: map[string]string{"TYPE": "pref"},
+		Params: Params{"TYPE": {"INTERNET", "HOME", "pref"}},
 	}},
 	"TEL": []*Field{{
 		Value: "+44 20 1234 5678",
-		Params: map[string]string{"TYPE": "pref"},
+		Params: Params{"TYPE": {"CELL", "VOICE", "pref"}},
 	}},
 	"ADR": []*Field{{
 		Value: ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
-		Params: map[string]string{"TYPE": "pref"},
+		Params: Params{"TYPE": {"HOME", "pref"}},
 	}},
 	"URL": []*Field{{
 		Value: "http://joebloggs.com",
-		Params: map[string]string{"TYPE": "pref"},
+		Params: Params{"TYPE": {"pref"}},
 		Group: "item1",
 	}},
 	"X-ABLABEL": []*Field{
@@ -103,18 +103,18 @@ var testCardApple = Card{
 	},
 	"IMPP": []*Field{{
 		Value: "skype:joe.bloggs",
-		Params: map[string]string{"X-SERVICE-TYPE": "Skype", "TYPE": "pref"},
+		Params: Params{"X-SERVICE-TYPE": {"Skype"}, "TYPE": {"HOME", "pref"}},
 	}},
 	"X-SOCIALPROFILE": []*Field{{
 		Value: "https://twitter.com/joebloggs",
-		Params: map[string]string{"TYPE": "twitter"},
+		Params: Params{"TYPE": {"twitter"}},
 	}},
 }
 
 func TestCard(t *testing.T) {
 	testCardFullName := &Field{
 		Value: "J. Doe",
-		Params: map[string]string{"PID": "1.1"},
+		Params: Params{"PID": {"1.1"}},
 	}
 
 	if field := testCard.Get(FieldFormattedName); !reflect.DeepEqual(testCardFullName, field) {
@@ -138,11 +138,11 @@ func TestCard_Preferred(t *testing.T) {
 		"EMAIL": []*Field{
 			{
 				Value: "me@example.org",
-				Params: map[string]string{"TYPE": "home"},
+				Params: Params{"TYPE": {"home"}},
 			},
 			{
 				Value: "me@example.com",
-				Params: map[string]string{"TYPE": "work", "PREF": "1"},
+				Params: Params{"TYPE": {"work"}, "PREF": {"1"}},
 			},
 		},
 	}

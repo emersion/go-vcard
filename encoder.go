@@ -51,8 +51,10 @@ func formatLine(key string, field *Field) string {
 	}
 	s += key
 
-	for pk, pv := range field.Params {
-		s += ";" + formatParam(pk, pv)
+	for pk, pvs := range field.Params {
+		for _, pv := range pvs {
+			s += ";" + formatParam(pk, pv)
+		}
 	}
 
 	s += ":" + field.Value

@@ -69,10 +69,10 @@ func parseLine(l string) (key string, field *Field, err error) {
 	key, field.Group = parseKey(kparams[0])
 
 	if len(kparams) > 1 {
-		field.Params = make(map[string]string)
+		field.Params = make(Params)
 		for i := 1; i < len(kparams); i++ {
 			pk, pv := parseParam(kparams[i])
-			field.Params[pk] = pv
+			field.Params[pk] = append(field.Params[pk], pv)
 		}
 	}
 
