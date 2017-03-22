@@ -26,7 +26,7 @@ const (
 	ParamMediaType = "MEDIATYPE"
 	ParamCalendarScale = "CALSCALE"
 	ParamSortAs = "SORT-AS"
-	ParamGeo = "GEO"
+	ParamGeolocation = "GEO"
 	ParamTimezone = "TZ"
 )
 
@@ -57,7 +57,7 @@ const (
 
 	// Geographical Properties
 	FieldTimezone = "TZ"
-	FieldGeo = "GEO"
+	FieldGeolocation = "GEO"
 
 	// Organizational Properties
 	FieldTitle = "TITLE"
@@ -82,7 +82,7 @@ const (
 	FieldKey = "KEY"
 
 	// Calendar Properties
-	FieldFBURL = "FBURL"
+	FieldFreeOrBusyURL = "FBURL"
 	FieldCalendarAddressURI = "CALADRURI"
 	FieldCalendarURI = "CALURI"
 )
