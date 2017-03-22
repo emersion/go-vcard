@@ -134,23 +134,28 @@ func TestCard(t *testing.T) {
 }
 
 func TestCard_Preferred(t *testing.T) {
-	card := Card{
-		"EMAIL": []*Field{
-			{
-				Value: "me@example.org",
-				Params: Params{"TYPE": {"home"}},
+	cards := []Card{
+		Card{
+			"EMAIL": []*Field{
+				{Value: "me@example.org", Params: Params{"TYPE": {"home"}}},
+				{Value: "me@example.com", Params: Params{"TYPE": {"work"}, "PREF": {"1"}}},
 			},
-			{
-				Value: "me@example.com",
-				Params: Params{"TYPE": {"work"}, "PREF": {"1"}},
+		},
+		// Apple Contacts
+		Card{
+			"EMAIL": []*Field{
+				{Value: "me@example.org", Params: Params{"TYPE": {"home"}}},
+				{Value: "me@example.com", Params: Params{"TYPE": {"work", "pref"}}},
 			},
 		},
 	}
 
-	if pref := card.Preferred(FieldEmail); pref != card["EMAIL"][1] {
-		t.Errorf("Expected card preferred email to be %+v but got %+v", card["EMAIL"][1], pref)
-	}
-	if v := card.PreferredValue(FieldEmail); v != "me@example.com" {
-		t.Errorf("Expected card preferred email to be %q but got %q", "me@example.com", v)
+	for _, card := range cards {
+		if pref := card.Preferred(FieldEmail); pref != card["EMAIL"][1] {
+			t.Errorf("Expected card preferred email to be %+v but got %+v", card["EMAIL"][1], pref)
+		}
+		if v := card.PreferredValue(FieldEmail); v != "me@example.com" {
+			t.Errorf("Expected card preferred email to be %q but got %q", "me@example.com", v)
+		}
 	}
 }

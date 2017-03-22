@@ -108,12 +108,17 @@ func (c Card) Preferred(k string) *Field {
 	field := fields[0]
 	max := 0
 	for _, f := range fields {
-		pref := f.Params.Get(ParamPreferred)
-		if pref != "" {
-			if n, err := strconv.Atoi(pref); err == nil && n > max {
-				max = n
-				field = f
-			}
+		n := 0
+		if pref := f.Params.Get(ParamPreferred); pref != "" {
+			n, _ = strconv.Atoi(pref)
+		} else if f.Params.HasValue(ParamType, "pref") {
+			// Apple Contacts adds "pref" to the TYPE param
+			n = 1
+		}
+
+		if n > max {
+			max = n
+			field = f
 		}
 	}
 	return field
@@ -221,6 +226,16 @@ func (p Params) Get(k string) string {
 		return ""
 	}
 	return values[0]
+}
+
+// HasValue returns true if and only if the key k has a value v.
+func (p Params) HasValue(k, v string) bool {
+	for _, vv := range p[k] {
+		if v == vv {
+			return true
+		}
+	}
+	return false
 }
 
 // Kind is an object's kind.
