@@ -111,6 +111,17 @@ var testCardApple = Card{
 	}},
 }
 
+func TestMaybeGet(t *testing.T) {
+	l := []string{"a", "b", "c"}
+
+	expected := []string{"a", "b", "c", "", ""}
+	for i, exp := range expected {
+		if v := maybeGet(l, i); v != exp {
+			t.Errorf("maybeGet(l, %v): expected %q but got %q", i, exp, v)
+		}
+	}
+}
+
 func TestCard(t *testing.T) {
 	testCardFullName := testCard["FN"][0]
 	if field := testCard.Get(FieldFormattedName); !reflect.DeepEqual(testCardFullName, field) {
