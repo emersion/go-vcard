@@ -153,6 +153,22 @@ func TestCard(t *testing.T) {
 	}
 }
 
+func TestCard_AddValue(t *testing.T) {
+	card := make(Card)
+
+	name1 := "Akiyama Mio"
+	card.AddValue("FN", name1)
+	if values := card.Values("FN"); len(values) != 1 || values[0] != name1 {
+		t.Errorf("Expected one FN value, got %v", values)
+	}
+
+	name2 := "Mio Akiyama"
+	card.AddValue("FN", name2)
+	if values := card.Values("FN"); len(values) != 2 || values[0] != name1 || values[1] != name2 {
+		t.Errorf("Expected two FN values, got %v", values)
+	}
+}
+
 func TestCard_Preferred(t *testing.T) {
 	if pref := testCard.Preferred("X-IDONTEXIST"); pref != nil {
 		t.Errorf("Expected card preferred X-IDONTEXIST field to be %+v but got %+v", nil, pref)
