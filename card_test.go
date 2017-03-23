@@ -7,14 +7,14 @@ import (
 
 var testCard = Card{
 	"VERSION": []*Field{{Value: "4.0"}},
-	"UID": []*Field{{Value: "urn:uuid:4fbe8971-0bc3-424c-9c26-36c3e1eff6b1"}},
+	"UID":     []*Field{{Value: "urn:uuid:4fbe8971-0bc3-424c-9c26-36c3e1eff6b1"}},
 	"FN": []*Field{{
-		Value: "J. Doe",
+		Value:  "J. Doe",
 		Params: Params{"PID": {"1.1"}},
 	}},
 	"N": []*Field{{Value: "Doe;J.;;;"}},
 	"EMAIL": []*Field{{
-		Value: "jdoe@example.com",
+		Value:  "jdoe@example.com",
 		Params: Params{"PID": {"1.1"}},
 	}},
 	"CLIENTPIDMAP": []*Field{{Value: "1;urn:uuid:53e374d9-337e-4727-8803-a1e9c14e0556"}},
@@ -22,48 +22,48 @@ var testCard = Card{
 
 var testCardHandmade = Card{
 	"VERSION": []*Field{{Value: "4.0"}},
-	"N": []*Field{{Value: "Bloggs;Joe;;;"}},
-	"FN": []*Field{{Value: "Joe Bloggs"}},
+	"N":       []*Field{{Value: "Bloggs;Joe;;;"}},
+	"FN":      []*Field{{Value: "Joe Bloggs"}},
 	"EMAIL": []*Field{{
-		Value: "me@joebloggs.com",
+		Value:  "me@joebloggs.com",
 		Params: Params{"TYPE": {"home"}, "PREF": {"1"}},
 	}},
 	"TEL": []*Field{{
-		Value: "tel:+44 20 1234 5678",
+		Value:  "tel:+44 20 1234 5678",
 		Params: Params{"TYPE": {"\"cell", "home\""}, "PREF": {"1"}},
 	}},
 	"ADR": []*Field{{
-		Value: ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
+		Value:  ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
 		Params: Params{"TYPE": {"home"}, "PREF": {"1"}},
 	}},
 	"URL": []*Field{{
-		Value: "http://joebloggs.com",
+		Value:  "http://joebloggs.com",
 		Params: Params{"TYPE": {"home"}, "PREF": {"1"}},
 	}},
 	"IMPP": []*Field{{
-		Value: "skype:joe.bloggs",
+		Value:  "skype:joe.bloggs",
 		Params: Params{"TYPE": {"home"}, "PREF": {"1"}},
 	}},
 	"X-SOCIALPROFILE": []*Field{{
-		Value: "twitter:https://twitter.com/joebloggs",
+		Value:  "twitter:https://twitter.com/joebloggs",
 		Params: Params{"TYPE": {"home"}, "PREF": {"1"}},
 	}},
 }
 
 var testCardGoogle = Card{
 	"VERSION": []*Field{{Value: "3.0"}},
-	"N": []*Field{{Value: "Bloggs;Joe;;;"}},
-	"FN": []*Field{{Value: "Joe Bloggs"}},
+	"N":       []*Field{{Value: "Bloggs;Joe;;;"}},
+	"FN":      []*Field{{Value: "Joe Bloggs"}},
 	"EMAIL": []*Field{{
-		Value: "me@joebloggs.com",
+		Value:  "me@joebloggs.com",
 		Params: Params{"TYPE": {"INTERNET", "HOME"}},
 	}},
 	"TEL": []*Field{{
-		Value: "+44 20 1234 5678",
+		Value:  "+44 20 1234 5678",
 		Params: Params{"TYPE": {"CELL"}},
 	}},
 	"ADR": []*Field{{
-		Value: ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
+		Value:  ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
 		Params: Params{"TYPE": {"HOME"}},
 	}},
 	"URL": []*Field{
@@ -79,34 +79,34 @@ var testCardGoogle = Card{
 
 var testCardApple = Card{
 	"VERSION": []*Field{{Value: "3.0"}},
-	"N": []*Field{{Value: "Bloggs;Joe;;;"}},
-	"FN": []*Field{{Value: "Joe Bloggs"}},
+	"N":       []*Field{{Value: "Bloggs;Joe;;;"}},
+	"FN":      []*Field{{Value: "Joe Bloggs"}},
 	"EMAIL": []*Field{{
-		Value: "me@joebloggs.com",
+		Value:  "me@joebloggs.com",
 		Params: Params{"TYPE": {"INTERNET", "HOME", "pref"}},
 	}},
 	"TEL": []*Field{{
-		Value: "+44 20 1234 5678",
+		Value:  "+44 20 1234 5678",
 		Params: Params{"TYPE": {"CELL", "VOICE", "pref"}},
 	}},
 	"ADR": []*Field{{
-		Value: ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
+		Value:  ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
 		Params: Params{"TYPE": {"HOME", "pref"}},
 	}},
 	"URL": []*Field{{
-		Value: "http://joebloggs.com",
+		Value:  "http://joebloggs.com",
 		Params: Params{"TYPE": {"pref"}},
-		Group: "item1",
+		Group:  "item1",
 	}},
 	"X-ABLABEL": []*Field{
 		{Value: "_$!<HomePage>!$_", Group: "item1"},
 	},
 	"IMPP": []*Field{{
-		Value: "skype:joe.bloggs",
+		Value:  "skype:joe.bloggs",
 		Params: Params{"X-SERVICE-TYPE": {"Skype"}, "TYPE": {"HOME", "pref"}},
 	}},
 	"X-SOCIALPROFILE": []*Field{{
-		Value: "https://twitter.com/joebloggs",
+		Value:  "https://twitter.com/joebloggs",
 		Params: Params{"TYPE": {"twitter"}},
 	}},
 }
@@ -204,7 +204,7 @@ func TestCard_Name(t *testing.T) {
 
 	expectedName := &Name{
 		FamilyName: "Doe",
-		GivenName: "J.",
+		GivenName:  "J.",
 	}
 	expectedNames := []*Name{expectedName}
 	card.AddName(expectedName)

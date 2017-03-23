@@ -1,8 +1,8 @@
 package vcard
 
 import (
-	"strings"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -57,8 +57,8 @@ IMPP;X-SERVICE-TYPE=Skype;type=HOME;type=pref:skype:joe.bloggs
 X-SOCIALPROFILE;type=twitter:https://twitter.com/joebloggs
 END:VCARD`
 
-var decoderTests = []struct{
-	s string
+var decoderTests = []struct {
+	s    string
 	card Card
 }{
 	{testCardString, testCard},

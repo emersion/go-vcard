@@ -9,7 +9,7 @@ import (
 
 // MIME type and file extension for VCard, defined in RFC 6350 section 10.1.
 const (
-	MIMEType = "text/vcard"
+	MIMEType  = "text/vcard"
 	Extension = "vcf"
 )
 
@@ -17,74 +17,74 @@ const timestampLayout = "20060102T150405Z"
 
 // Card property parameters.
 const (
-	ParamLanguage = "LANGUAGE"
-	ParamValue = "VALUE"
-	ParamPreferred = "PREF"
-	ParamAltID = "ALTID"
-	ParamPID = "PID"
-	ParamType = "TYPE"
-	ParamMediaType = "MEDIATYPE"
+	ParamLanguage      = "LANGUAGE"
+	ParamValue         = "VALUE"
+	ParamPreferred     = "PREF"
+	ParamAltID         = "ALTID"
+	ParamPID           = "PID"
+	ParamType          = "TYPE"
+	ParamMediaType     = "MEDIATYPE"
 	ParamCalendarScale = "CALSCALE"
-	ParamSortAs = "SORT-AS"
-	ParamGeolocation = "GEO"
-	ParamTimezone = "TZ"
+	ParamSortAs        = "SORT-AS"
+	ParamGeolocation   = "GEO"
+	ParamTimezone      = "TZ"
 )
 
 // Card properties.
 const (
 	// General Properties
 	FieldSource = "SOURCE"
-	FieldKind = "KIND"
-	FieldXML = "XML"
+	FieldKind   = "KIND"
+	FieldXML    = "XML"
 
 	// Identification Properties
 	FieldFormattedName = "FN"
-	FieldName = "N"
-	FieldNickname = "NICKNAME"
-	FieldPhoto = "PHOTO"
-	FieldBirthday = "BDAY"
-	FieldAnniversary = "ANIVERSARY"
-	FieldGender = "GENDER"
+	FieldName          = "N"
+	FieldNickname      = "NICKNAME"
+	FieldPhoto         = "PHOTO"
+	FieldBirthday      = "BDAY"
+	FieldAnniversary   = "ANIVERSARY"
+	FieldGender        = "GENDER"
 
 	// Delivery Addressing Properties
 	FieldAddress = "ADR"
 
 	// Communications Properties
 	FieldTelephone = "TEL"
-	FieldEmail = "EMAIL"
-	FieldIMPP = "IMPP" // Instant Messaging and Presence Protocol
-	FieldLanguage = "LANG"
+	FieldEmail     = "EMAIL"
+	FieldIMPP      = "IMPP" // Instant Messaging and Presence Protocol
+	FieldLanguage  = "LANG"
 
 	// Geographical Properties
-	FieldTimezone = "TZ"
+	FieldTimezone    = "TZ"
 	FieldGeolocation = "GEO"
 
 	// Organizational Properties
-	FieldTitle = "TITLE"
-	FieldRole = "ROLE"
-	FieldLogo = "LOGO"
+	FieldTitle        = "TITLE"
+	FieldRole         = "ROLE"
+	FieldLogo         = "LOGO"
 	FieldOrganization = "ORG"
-	FieldMember = "MEMBER"
-	FieldRelated = "RELATED"
+	FieldMember       = "MEMBER"
+	FieldRelated      = "RELATED"
 
 	// Explanatory Properties
-	FieldCategories = "CATEGORIES"
-	FieldNote = "NOTE"
-	FieldProductID = "PRODID"
-	FieldRevision = "REV"
-	FieldSound = "SOUND"
-	FieldUID = "UID"
+	FieldCategories   = "CATEGORIES"
+	FieldNote         = "NOTE"
+	FieldProductID    = "PRODID"
+	FieldRevision     = "REV"
+	FieldSound        = "SOUND"
+	FieldUID          = "UID"
 	FieldClientPIDMap = "CLIENTPIDMAP"
-	FieldURL = "URL"
-	FieldVersion = "VERSION"
+	FieldURL          = "URL"
+	FieldVersion      = "VERSION"
 
 	// Security Properties
 	FieldKey = "KEY"
 
 	// Calendar Properties
-	FieldFreeOrBusyURL = "FBURL"
+	FieldFreeOrBusyURL      = "FBURL"
 	FieldCalendarAddressURI = "CALADRURI"
-	FieldCalendarURI = "CALURI"
+	FieldCalendarURI        = "CALURI"
 )
 
 func maybeGet(l []string, i int) string {
@@ -314,9 +314,9 @@ func (c Card) SetRevision(t time.Time) {
 
 // A field contains a value and some parameters.
 type Field struct {
-	Value string
+	Value  string
 	Params Params
-	Group string
+	Group  string
 }
 
 // Params is a set of field parameters.
@@ -369,10 +369,10 @@ type Kind string
 
 // Values for FieldKind.
 const (
-	KindIndividual Kind = "individual"
-	KindGroup = "group"
-	KindOrganization = "org"
-	KindLocation = "location"
+	KindIndividual   Kind = "individual"
+	KindGroup             = "group"
+	KindOrganization      = "org"
+	KindLocation          = "location"
 )
 
 // Values for ParamType.
@@ -382,44 +382,44 @@ const (
 	TypeWork = "work"
 
 	// For FieldTelephone
-	TypeText = "text"
-	TypeVoice = "voice" // Default
-	TypeFax = "fax"
-	TypeCell = "cell"
-	TypeVideo = "video"
-	TypePager = "pager"
+	TypeText      = "text"
+	TypeVoice     = "voice" // Default
+	TypeFax       = "fax"
+	TypeCell      = "cell"
+	TypeVideo     = "video"
+	TypePager     = "pager"
 	TypeTextPhone = "textphone"
 
 	// For FieldRelated
-	TypeContact = "contact"
+	TypeContact      = "contact"
 	TypeAcquaintance = "acquaintance"
-	TypeFriend = "friend"
-	TypeMet = "met"
-	TypeCoWorker = "co-worker"
-	TypeColleague = "colleague"
-	TypeCoResident = "co-resident"
-	TypeNeighbor = "neighbor"
-	TypeChild = "child"
-	TypeParent = "parent"
-	TypeSibling = "sibling"
-	TypeSpouse = "spouse"
-	TypeKin = "kin"
-	TypeMuse = "muse"
-	TypeCrush = "crush"
-	TypeDate = "date"
-	TypeSweetheart = "sweetheart"
-	TypeMe = "me"
-	TypeAgent = "agent"
-	TypeEmergency = "emergency"
+	TypeFriend       = "friend"
+	TypeMet          = "met"
+	TypeCoWorker     = "co-worker"
+	TypeColleague    = "colleague"
+	TypeCoResident   = "co-resident"
+	TypeNeighbor     = "neighbor"
+	TypeChild        = "child"
+	TypeParent       = "parent"
+	TypeSibling      = "sibling"
+	TypeSpouse       = "spouse"
+	TypeKin          = "kin"
+	TypeMuse         = "muse"
+	TypeCrush        = "crush"
+	TypeDate         = "date"
+	TypeSweetheart   = "sweetheart"
+	TypeMe           = "me"
+	TypeAgent        = "agent"
+	TypeEmergency    = "emergency"
 )
 
 // Name contains an object's name components.
 type Name struct {
 	*Field
 
-	FamilyName string
-	GivenName string
-	AdditionalName string
+	FamilyName      string
+	GivenName       string
+	AdditionalName  string
 	HonorificPrefix string
 	HonorificSuffix string
 }
@@ -455,24 +455,24 @@ type Sex string
 
 const (
 	SexUnspecified Sex = ""
-	SexFemale = "F"
-	SexMale = "M"
-	SexOther = "O"
-	SexNone = "N"
-	SexUnknown = "U"
+	SexFemale          = "F"
+	SexMale            = "M"
+	SexOther           = "O"
+	SexNone            = "N"
+	SexUnknown         = "U"
 )
 
 // An Address is a delivery address.
 type Address struct {
 	*Field
 
-	PostOfficeBox string
+	PostOfficeBox   string
 	ExtendedAddress string // e.g., apartment or suite number
-	StreetAddress string
-	Locality string // e.g., city
-	Region string // e.g., state or province
-	PostalCode string
-	Country string
+	StreetAddress   string
+	Locality        string // e.g., city
+	Region          string // e.g., state or province
+	PostalCode      string
+	Country         string
 }
 
 func newAddress(field *Field) *Address {

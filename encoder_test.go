@@ -34,8 +34,8 @@ func TestFormatLine_withGroup(t *testing.T) {
 	}
 }
 
-var testValue = []struct{
-	v string
+var testValue = []struct {
+	v         string
 	formatted string
 }{
 	{"Hello World!", "Hello World!"},
