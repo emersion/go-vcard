@@ -22,6 +22,18 @@ func TestEncoder(t *testing.T) {
 	}
 }
 
+func TestFormatLine_withGroup(t *testing.T) {
+	l := formatLine("FN", &Field{
+		Value: "Akiyama Mio",
+		Group: "item1",
+	})
+
+	expected := "item1.FN:Akiyama Mio"
+	if l != expected {
+		t.Errorf("Excpected formatted line with group to be %q, but got %q", expected, l)
+	}
+}
+
 var testValue = []struct{
 	v string
 	formatted string
