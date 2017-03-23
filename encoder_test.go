@@ -21,3 +21,21 @@ func TestEncoder(t *testing.T) {
 		t.Errorf("Invalid parsed card: expected \n%+v\n but got \n%+v", testCard, card)
 	}
 }
+
+var testValue = []struct{
+	v string
+	formatted string
+}{
+	{"Hello World!", "Hello World!"},
+	{"this is a single value, with a comma encoded", "this is a single value\\, with a comma encoded"},
+	{"Mythical Manager\nHyjinx Software Division", "Mythical Manager\\nHyjinx Software Division"},
+	{"aa\\\nbb", "aa\\\\\\nbb"},
+}
+
+func TestFormatValue(t *testing.T) {
+	for _, test := range testValue {
+		if formatted := formatValue(test.v); formatted != test.formatted {
+			t.Errorf("formatValue(%q): expected %q, got %q", test.v, test.formatted, formatted)
+		}
+	}
+}
