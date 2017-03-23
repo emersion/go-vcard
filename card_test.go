@@ -124,24 +124,43 @@ func TestMaybeGet(t *testing.T) {
 
 func TestCard(t *testing.T) {
 	testCardFullName := testCard["FN"][0]
-	if field := testCard.Get(FieldFormattedName); !reflect.DeepEqual(testCardFullName, field) {
+	if field := testCard.Get(FieldFormattedName); testCardFullName != field {
 		t.Errorf("Expected card FN field to be %+v but got %+v", testCardFullName, field)
 	}
 	if v := testCard.Value(FieldFormattedName); v != testCardFullName.Value {
 		t.Errorf("Expected card FN field to be %q but got %q", testCardFullName.Value, v)
 	}
 
-	testCardName := &Name{
-		Field: testCard["N"][0],
-		FamilyName: "Doe",
-		GivenName: "J.",
+	if field := testCard.Get("X-IDONTEXIST"); field != nil {
+		t.Errorf("Expected card X-IDONTEXIST field to be %+v but got %+v", nil, field)
 	}
-	if name := testCard.Name(); !reflect.DeepEqual(testCardName, name) {
-		t.Errorf("Expected card name to be %+v but got %+v", testCardName, name)
+	if v := testCard.Value("X-IDONTEXIST"); v != "" {
+		t.Errorf("Expected card X-IDONTEXIST field value to be %q but got %q", "", v)
+	}
+
+	cardMultipleValues := Card{
+		"EMAIL": []*Field{
+			{Value: "me@example.org", Params: Params{"TYPE": {"home"}}},
+			{Value: "me@example.com", Params: Params{"TYPE": {"work"}}},
+		},
+	}
+	expected := []string{"me@example.org", "me@example.com"}
+	if values := cardMultipleValues.Values(FieldEmail); !reflect.DeepEqual(expected, values) {
+		t.Errorf("Expected card emails to be %+v but got %+v", expected, values)
+	}
+	if values := cardMultipleValues.Values("X-IDONTEXIST"); values != nil {
+		t.Errorf("Expected card X-IDONTEXIST values to be %+v but got %+v", nil, values)
 	}
 }
 
 func TestCard_Preferred(t *testing.T) {
+	if pref := testCard.Preferred("X-IDONTEXIST"); pref != nil {
+		t.Errorf("Expected card preferred X-IDONTEXIST field to be %+v but got %+v", nil, pref)
+	}
+	if v := testCard.PreferredValue("X-IDONTEXIST"); v != "" {
+		t.Errorf("Expected card preferred X-IDONTEXIST field value to be %q but got %q", "", v)
+	}
+
 	cards := []Card{
 		Card{
 			"EMAIL": []*Field{
@@ -149,7 +168,13 @@ func TestCard_Preferred(t *testing.T) {
 				{Value: "me@example.com", Params: Params{"TYPE": {"work"}, "PREF": {"1"}}},
 			},
 		},
-		// Apple Contacts
+		Card{
+			"EMAIL": []*Field{
+				{Value: "me@example.org", Params: Params{"TYPE": {"home"}, "PREF": {"25"}}},
+				{Value: "me@example.com", Params: Params{"TYPE": {"work"}, "PREF": {"50"}}},
+			},
+		},
+		// v3.0
 		Card{
 			"EMAIL": []*Field{
 				{Value: "me@example.org", Params: Params{"TYPE": {"home"}}},
@@ -165,5 +190,79 @@ func TestCard_Preferred(t *testing.T) {
 		if v := card.PreferredValue(FieldEmail); v != "me@example.com" {
 			t.Errorf("Expected card preferred email to be %q but got %q", "me@example.com", v)
 		}
+	}
+}
+
+func TestCard_Name(t *testing.T) {
+	card := make(Card)
+	if name := card.Name(); name != nil {
+		t.Errorf("Expected empty card name to be %+v but got %+v", nil, name)
+	}
+	if names := card.Names(); names != nil {
+		t.Errorf("Expected empty card names to be %+v but got %+v", nil, names)
+	}
+
+	expectedName := &Name{
+		FamilyName: "Doe",
+		GivenName: "J.",
+	}
+	expectedNames := []*Name{expectedName}
+	card.AddName(expectedName)
+	if name := card.Name(); !reflect.DeepEqual(expectedName, name) {
+		t.Errorf("Expected populated card name to be %+v but got %+v", expectedName, name)
+	}
+	if names := card.Names(); !reflect.DeepEqual(expectedNames, names) {
+		t.Errorf("Expected populated card names to be %+v but got %+v", expectedNames, names)
+	}
+}
+
+func TestCard_Kind(t *testing.T) {
+	card := make(Card)
+
+	if kind := card.Kind(); kind != KindIndividual {
+		t.Errorf("Expected kind of empty card to be %q but got %q", KindIndividual, kind)
+	}
+
+	card.SetKind(KindOrganization)
+	if kind := card.Kind(); kind != KindOrganization {
+		t.Errorf("Expected kind of populated card to be %q but got %q", KindOrganization, kind)
+	}
+}
+
+func TestCard_FormattedNames(t *testing.T) {
+	card := make(Card)
+
+	expectedNames := []*Field{{Value: ""}}
+	if names := card.FormattedNames(); !reflect.DeepEqual(expectedNames, names) {
+		t.Errorf("Expected empty card formatted names to be %+v but got %+v", expectedNames, names)
+	}
+
+	expectedNames = []*Field{{Value: "Akiyama Mio"}}
+	card.SetValue(FieldFormattedName, expectedNames[0].Value)
+	if names := card.FormattedNames(); !reflect.DeepEqual(expectedNames, names) {
+		t.Errorf("Expected populated card formatted names to be %+v but got %+v", expectedNames, names)
+	}
+}
+
+func TestCard_Gender(t *testing.T) {
+	card := make(Card)
+
+	var expectedSex Sex
+	var expectedIdentity string
+	if sex, identity := card.Gender(); sex != expectedSex || identity != expectedIdentity {
+		t.Errorf("Expected gender to be (%q %q) but got (%q %q)", expectedSex, expectedIdentity, sex, identity)
+	}
+
+	expectedSex = SexFemale
+	card.SetGender(expectedSex, expectedIdentity)
+	if sex, identity := card.Gender(); sex != expectedSex || identity != expectedIdentity {
+		t.Errorf("Expected gender to be (%q %q) but got (%q %q)", expectedSex, expectedIdentity, sex, identity)
+	}
+
+	expectedSex = SexOther
+	expectedIdentity = "<3"
+	card.SetGender(expectedSex, expectedIdentity)
+	if sex, identity := card.Gender(); sex != expectedSex || identity != expectedIdentity {
+		t.Errorf("Expected gender to be (%q %q) but got (%q %q)", expectedSex, expectedIdentity, sex, identity)
 	}
 }

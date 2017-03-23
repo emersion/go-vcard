@@ -247,7 +247,7 @@ func (c Card) AddName(name *Name) {
 func (c Card) Gender() (sex Sex, identity string) {
 	v := c.Value(FieldGender)
 	parts := strings.SplitN(v, ";", 2)
-	return Sex(strings.ToLower(parts[0])), maybeGet(parts, 1)
+	return Sex(strings.ToUpper(parts[0])), maybeGet(parts, 1)
 }
 
 // SetGender sets this card's gender.
@@ -371,7 +371,7 @@ type Kind string
 const (
 	KindIndividual Kind = "individual"
 	KindGroup = "group"
-	KindOrg = "org"
+	KindOrganization = "org"
 	KindLocation = "location"
 )
 
@@ -437,6 +437,9 @@ func newName(field *Field) *Name {
 }
 
 func (n *Name) field() *Field {
+	if n.Field == nil {
+		n.Field = new(Field)
+	}
 	n.Field.Value = strings.Join([]string{
 		n.FamilyName,
 		n.GivenName,
@@ -487,6 +490,9 @@ func newAddress(field *Field) *Address {
 }
 
 func (a *Address) field() *Field {
+	if a.Field == nil {
+		a.Field = new(Field)
+	}
 	a.Field.Value = strings.Join([]string{
 		a.PostOfficeBox,
 		a.ExtendedAddress,
