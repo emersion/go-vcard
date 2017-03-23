@@ -282,3 +282,37 @@ func TestCard_Gender(t *testing.T) {
 		t.Errorf("Expected gender to be (%q %q) but got (%q %q)", expectedSex, expectedIdentity, sex, identity)
 	}
 }
+
+func TestCard_Address(t *testing.T) {
+	card := make(Card)
+
+	if address := card.Address(); address != nil {
+		t.Errorf("Expected empty card address to be nil, got %v", address)
+	}
+	if addresses := card.Addresses(); addresses != nil {
+		t.Errorf("Expected empty card addresses to be nil, got %v", addresses)
+	}
+
+	added := &Address{
+		StreetAddress: "1 Trafalgar Square",
+		Locality: "London",
+		PostalCode: "WC2N",
+		Country: "United Kingdom",
+	}
+	card.AddAddress(added)
+
+	equal := func(a, b *Address) bool {
+		if (a == nil && b != nil) || (b == nil && a != nil) {
+			return false
+		}
+		a.Field, b.Field = nil, nil
+		return reflect.DeepEqual(a, b)
+	}
+
+	if address := card.Address(); !equal(added, address) {
+		t.Errorf("Expected address to be %+v but got %+v", added, address)
+	}
+	if addresses := card.Addresses(); len(addresses) != 1 || !equal(added, addresses[0]) {
+		t.Errorf("Expected addresses to be %+v, got %+v", []*Address{added}, addresses)
+	}
+}
