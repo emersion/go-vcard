@@ -3,6 +3,7 @@ package vcard
 import (
 	"reflect"
 	"testing"
+	"time"
 )
 
 var testCard = Card{
@@ -264,5 +265,23 @@ func TestCard_Gender(t *testing.T) {
 	card.SetGender(expectedSex, expectedIdentity)
 	if sex, identity := card.Gender(); sex != expectedSex || identity != expectedIdentity {
 		t.Errorf("Expected gender to be (%q %q) but got (%q %q)", expectedSex, expectedIdentity, sex, identity)
+	}
+}
+
+func TestCard_Revision( t*testing.T) {
+	card := make(Card)
+
+	if rev, err := card.Revision(); err != nil {
+		t.Fatal("Expected no error when getting revision of an empty card, got:", err)
+	} else if !rev.IsZero() {
+		t.Error("Expected a zero time when getting revision of an empty card, got:", rev)
+	}
+
+	expected := time.Date(1984, time.November, 4, 0, 0, 0, 0, time.UTC)
+	card.SetRevision(expected)
+	if rev, err := card.Revision(); err != nil {
+		t.Fatal("Expected no error when getting revision of a populated card, got:", err)
+	} else if !rev.Equal(rev) {
+		t.Error("Expected revision to be %v but got %v", expected, rev)
 	}
 }
