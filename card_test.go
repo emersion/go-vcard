@@ -8,14 +8,14 @@ import (
 
 var testCard = Card{
 	"VERSION": []*Field{{Value: "4.0"}},
-	"UID": []*Field{{Value: "urn:uuid:4fbe8971-0bc3-424c-9c26-36c3e1eff6b1"}},
+	"UID":     []*Field{{Value: "urn:uuid:4fbe8971-0bc3-424c-9c26-36c3e1eff6b1"}},
 	"FN": []*Field{{
-		Value: "J. Doe",
+		Value:  "J. Doe",
 		Params: Params{"PID": {"1.1"}},
 	}},
 	"N": []*Field{{Value: "Doe;J.;;;"}},
 	"EMAIL": []*Field{{
-		Value: "jdoe@example.com",
+		Value:  "jdoe@example.com",
 		Params: Params{"PID": {"1.1"}},
 	}},
 	"CLIENTPIDMAP": []*Field{{Value: "1;urn:uuid:53e374d9-337e-4727-8803-a1e9c14e0556"}},
@@ -23,48 +23,48 @@ var testCard = Card{
 
 var testCardHandmade = Card{
 	"VERSION": []*Field{{Value: "4.0"}},
-	"N": []*Field{{Value: "Bloggs;Joe;;;"}},
-	"FN": []*Field{{Value: "Joe Bloggs"}},
+	"N":       []*Field{{Value: "Bloggs;Joe;;;"}},
+	"FN":      []*Field{{Value: "Joe Bloggs"}},
 	"EMAIL": []*Field{{
-		Value: "me@joebloggs.com",
+		Value:  "me@joebloggs.com",
 		Params: Params{"TYPE": {"home"}, "PREF": {"1"}},
 	}},
 	"TEL": []*Field{{
-		Value: "tel:+44 20 1234 5678",
+		Value:  "tel:+44 20 1234 5678",
 		Params: Params{"TYPE": {"\"cell", "home\""}, "PREF": {"1"}},
 	}},
 	"ADR": []*Field{{
-		Value: ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
+		Value:  ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
 		Params: Params{"TYPE": {"home"}, "PREF": {"1"}},
 	}},
 	"URL": []*Field{{
-		Value: "http://joebloggs.com",
+		Value:  "http://joebloggs.com",
 		Params: Params{"TYPE": {"home"}, "PREF": {"1"}},
 	}},
 	"IMPP": []*Field{{
-		Value: "skype:joe.bloggs",
+		Value:  "skype:joe.bloggs",
 		Params: Params{"TYPE": {"home"}, "PREF": {"1"}},
 	}},
 	"X-SOCIALPROFILE": []*Field{{
-		Value: "twitter:https://twitter.com/joebloggs",
+		Value:  "twitter:https://twitter.com/joebloggs",
 		Params: Params{"TYPE": {"home"}, "PREF": {"1"}},
 	}},
 }
 
 var testCardGoogle = Card{
 	"VERSION": []*Field{{Value: "3.0"}},
-	"N": []*Field{{Value: "Bloggs;Joe;;;"}},
-	"FN": []*Field{{Value: "Joe Bloggs"}},
+	"N":       []*Field{{Value: "Bloggs;Joe;;;"}},
+	"FN":      []*Field{{Value: "Joe Bloggs"}},
 	"EMAIL": []*Field{{
-		Value: "me@joebloggs.com",
+		Value:  "me@joebloggs.com",
 		Params: Params{"TYPE": {"INTERNET", "HOME"}},
 	}},
 	"TEL": []*Field{{
-		Value: "+44 20 1234 5678",
+		Value:  "+44 20 1234 5678",
 		Params: Params{"TYPE": {"CELL"}},
 	}},
 	"ADR": []*Field{{
-		Value: ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
+		Value:  ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
 		Params: Params{"TYPE": {"HOME"}},
 	}},
 	"URL": []*Field{
@@ -80,34 +80,34 @@ var testCardGoogle = Card{
 
 var testCardApple = Card{
 	"VERSION": []*Field{{Value: "3.0"}},
-	"N": []*Field{{Value: "Bloggs;Joe;;;"}},
-	"FN": []*Field{{Value: "Joe Bloggs"}},
+	"N":       []*Field{{Value: "Bloggs;Joe;;;"}},
+	"FN":      []*Field{{Value: "Joe Bloggs"}},
 	"EMAIL": []*Field{{
-		Value: "me@joebloggs.com",
+		Value:  "me@joebloggs.com",
 		Params: Params{"TYPE": {"INTERNET", "HOME", "pref"}},
 	}},
 	"TEL": []*Field{{
-		Value: "+44 20 1234 5678",
+		Value:  "+44 20 1234 5678",
 		Params: Params{"TYPE": {"CELL", "VOICE", "pref"}},
 	}},
 	"ADR": []*Field{{
-		Value: ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
+		Value:  ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
 		Params: Params{"TYPE": {"HOME", "pref"}},
 	}},
 	"URL": []*Field{{
-		Value: "http://joebloggs.com",
+		Value:  "http://joebloggs.com",
 		Params: Params{"TYPE": {"pref"}},
-		Group: "item1",
+		Group:  "item1",
 	}},
 	"X-ABLABEL": []*Field{
 		{Value: "_$!<HomePage>!$_", Group: "item1"},
 	},
 	"IMPP": []*Field{{
-		Value: "skype:joe.bloggs",
+		Value:  "skype:joe.bloggs",
 		Params: Params{"X-SERVICE-TYPE": {"Skype"}, "TYPE": {"HOME", "pref"}},
 	}},
 	"X-SOCIALPROFILE": []*Field{{
-		Value: "https://twitter.com/joebloggs",
+		Value:  "https://twitter.com/joebloggs",
 		Params: Params{"TYPE": {"twitter"}},
 	}},
 }
@@ -151,6 +151,22 @@ func TestCard(t *testing.T) {
 	}
 	if values := cardMultipleValues.Values("X-IDONTEXIST"); values != nil {
 		t.Errorf("Expected card X-IDONTEXIST values to be %+v but got %+v", nil, values)
+	}
+}
+
+func TestCard_AddValue(t *testing.T) {
+	card := make(Card)
+
+	name1 := "Akiyama Mio"
+	card.AddValue("FN", name1)
+	if values := card.Values("FN"); len(values) != 1 || values[0] != name1 {
+		t.Errorf("Expected one FN value, got %v", values)
+	}
+
+	name2 := "Mio Akiyama"
+	card.AddValue("FN", name2)
+	if values := card.Values("FN"); len(values) != 2 || values[0] != name1 || values[1] != name2 {
+		t.Errorf("Expected two FN values, got %v", values)
 	}
 }
 
@@ -205,7 +221,7 @@ func TestCard_Name(t *testing.T) {
 
 	expectedName := &Name{
 		FamilyName: "Doe",
-		GivenName: "J.",
+		GivenName:  "J.",
 	}
 	expectedNames := []*Name{expectedName}
 	card.AddName(expectedName)
@@ -265,6 +281,40 @@ func TestCard_Gender(t *testing.T) {
 	card.SetGender(expectedSex, expectedIdentity)
 	if sex, identity := card.Gender(); sex != expectedSex || identity != expectedIdentity {
 		t.Errorf("Expected gender to be (%q %q) but got (%q %q)", expectedSex, expectedIdentity, sex, identity)
+	}
+}
+
+func TestCard_Address(t *testing.T) {
+	card := make(Card)
+
+	if address := card.Address(); address != nil {
+		t.Errorf("Expected empty card address to be nil, got %v", address)
+	}
+	if addresses := card.Addresses(); addresses != nil {
+		t.Errorf("Expected empty card addresses to be nil, got %v", addresses)
+	}
+
+	added := &Address{
+		StreetAddress: "1 Trafalgar Square",
+		Locality: "London",
+		PostalCode: "WC2N",
+		Country: "United Kingdom",
+	}
+	card.AddAddress(added)
+
+	equal := func(a, b *Address) bool {
+		if (a == nil && b != nil) || (b == nil && a != nil) {
+			return false
+		}
+		a.Field, b.Field = nil, nil
+		return reflect.DeepEqual(a, b)
+	}
+
+	if address := card.Address(); !equal(added, address) {
+		t.Errorf("Expected address to be %+v but got %+v", added, address)
+	}
+	if addresses := card.Addresses(); len(addresses) != 1 || !equal(added, addresses[0]) {
+		t.Errorf("Expected addresses to be %+v, got %+v", []*Address{added}, addresses)
 	}
 }
 
