@@ -179,20 +179,20 @@ func TestCard_Preferred(t *testing.T) {
 	}
 
 	cards := []Card{
-		Card{
+		{
 			"EMAIL": []*Field{
 				{Value: "me@example.org", Params: Params{"TYPE": {"home"}}},
 				{Value: "me@example.com", Params: Params{"TYPE": {"work"}, "PREF": {"1"}}},
 			},
 		},
-		Card{
+		{
 			"EMAIL": []*Field{
 				{Value: "me@example.org", Params: Params{"TYPE": {"home"}, "PREF": {"25"}}},
 				{Value: "me@example.com", Params: Params{"TYPE": {"work"}, "PREF": {"50"}}},
 			},
 		},
 		// v3.0
-		Card{
+		{
 			"EMAIL": []*Field{
 				{Value: "me@example.org", Params: Params{"TYPE": {"home"}}},
 				{Value: "me@example.com", Params: Params{"TYPE": {"work", "pref"}}},
