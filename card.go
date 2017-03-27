@@ -43,7 +43,7 @@ const (
 	FieldNickname      = "NICKNAME"
 	FieldPhoto         = "PHOTO"
 	FieldBirthday      = "BDAY"
-	FieldAnniversary   = "ANIVERSARY"
+	FieldAnniversary   = "ANNIVERSARY"
 	FieldGender        = "GENDER"
 
 	// Delivery Addressing Properties
