@@ -97,6 +97,35 @@ func TestDecoder(t *testing.T) {
 	}
 }
 
+const testInvalidBegin = `BEGIN:INVALID
+END:VCARD`
+
+const testInvalidEnd = `BEGIN:VCARD
+END:INVALID`
+
+const testInvalidNoBegin = `VERSION:4.0
+END:VCARD`
+
+const testInvalidNoEnd = `BEGIN:VCARD
+VERSION:4.0`
+
+var decoderInvalidTests = []string{
+	testInvalidBegin,
+	testInvalidEnd,
+	testInvalidNoBegin,
+	testInvalidNoEnd,
+}
+
+func TestDecoder_invalid(t *testing.T) {
+	for _, test := range decoderInvalidTests {
+		r := strings.NewReader(test)
+		dec := NewDecoder(r)
+		if _, err := dec.Decode(); err == nil {
+			t.Fatalf("Expected error when decoding invalid card:\n%v", test)
+		}
+	}
+}
+
 func TestParseLine_escaped(t *testing.T) {
 	l := "NOTE:Mythical Manager\\nHyjinx Software Division\\nBabsCo\\, Inc.\\n"
 	expectedKey := "NOTE"

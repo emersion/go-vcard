@@ -19,10 +19,12 @@ func NewDecoder(r io.Reader) *Decoder {
 
 func (dec *Decoder) readLine() (string, error) {
 	l, err := dec.r.ReadString('\n')
-	if err != nil {
+	l = strings.TrimRight(l, "\r\n")
+	if len(l) > 0 && err == io.EOF {
+		return l, nil
+	} else if err != nil {
 		return l, err
 	}
-	l = strings.TrimRight(l, "\r\n")
 
 	for {
 		next, err := dec.r.Peek(1)
@@ -54,7 +56,7 @@ func (dec *Decoder) readLine() (string, error) {
 func (dec *Decoder) Decode() (Card, error) {
 	card := make(Card)
 
-	hasHeader := false
+	var hasBegin, hasEnd bool
 	for {
 		l, err := dec.readLine()
 		if err == io.EOF {
@@ -68,12 +70,12 @@ func (dec *Decoder) Decode() (Card, error) {
 			continue
 		}
 
-		if !hasHeader {
+		if !hasBegin {
 			if k == "BEGIN" {
 				if strings.ToUpper(f.Value) != "VCARD" {
 					return card, errors.New("vcard: invalid BEGIN value")
 				}
-				hasHeader = true
+				hasBegin = true
 				continue
 			} else {
 				return card, errors.New("vcard: no BEGIN field found")
@@ -82,12 +84,16 @@ func (dec *Decoder) Decode() (Card, error) {
 			if strings.ToUpper(f.Value) != "VCARD" {
 				return card, errors.New("vcard: invalid END value")
 			}
+			hasEnd = true
 			break
 		}
 
 		card[k] = append(card[k], f)
 	}
 
+	if !hasEnd {
+		return card, errors.New("vcard: no END field found")
+	}
 	return card, nil
 }
 
