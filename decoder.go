@@ -166,8 +166,6 @@ func parseParams(s string) (params Params, tail string, err error) {
 	return
 }
 
-var valueParser = strings.NewReplacer("\\\\", "\\", "\\n", "\n", "\\,", ",")
-
 func parseParamValues(s string) (values []string, more bool, tail string, err error) {
 	if s == "" {
 		return
@@ -217,6 +215,8 @@ func parseQuoted(s string, quote byte) (value, tail string, err error) {
 	value = string(buf)
 	return
 }
+
+var valueParser = strings.NewReplacer("\\\\", "\\", "\\n", "\n", "\\,", ",")
 
 func parseValue(s string) string {
 	return valueParser.Replace(s)
