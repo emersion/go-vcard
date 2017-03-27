@@ -4,6 +4,7 @@
 [![Build Status](https://travis-ci.org/emersion/go-vcard.svg?branch=master)](https://travis-ci.org/emersion/go-vcard)
 [![codecov](https://codecov.io/gh/emersion/go-vcard/branch/master/graph/badge.svg)](https://codecov.io/gh/emersion/go-vcard)
 [![Unstable](https://img.shields.io/badge/stability-unstable-yellow.svg)](https://github.com/emersion/stability-badges#unstable)
+[![Go Report Card](https://goreportcard.com/badge/github.com/emersion/go-vcard)](https://goreportcard.com/report/github.com/emersion/go-vcard)
 
 A Go library to parse and format [vCard](https://tools.ietf.org/html/rfc6350).
 
