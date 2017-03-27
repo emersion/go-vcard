@@ -65,8 +65,8 @@ func formatParam(k, v string) string {
 	return k + "=" + formatValue(v)
 }
 
-var valueReplacer = strings.NewReplacer("\\", "\\\\", "\n", "\\n", ",", "\\,")
+var valueFormatter = strings.NewReplacer("\\", "\\\\", "\n", "\\n", ",", "\\,")
 
 func formatValue(v string) string {
-	return valueReplacer.Replace(v)
+	return valueFormatter.Replace(v)
 }

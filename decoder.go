@@ -98,7 +98,7 @@ func parseLine(l string) (key string, field *Field, err error) {
 	}
 
 	field = new(Field)
-	field.Value = kv[1]
+	field.Value = parseValue(kv[1])
 	kparams := strings.Split(kv[0], ";")
 
 	key, field.Group = parseKey(kparams[0])
@@ -107,6 +107,9 @@ func parseLine(l string) (key string, field *Field, err error) {
 		field.Params = make(Params)
 		for i := 1; i < len(kparams); i++ {
 			pk, pvs := parseParam(kparams[i])
+			for i, pv := range pvs {
+				pvs[i] = parseValue(pv)
+			}
 			field.Params[pk] = append(field.Params[pk], pvs...)
 		}
 	}
@@ -132,4 +135,10 @@ func parseParam(s string) (k string, vs []string) {
 		return s, nil
 	}
 	return strings.ToUpper(kv[0]), strings.Split(kv[1], ",")
+}
+
+var valueParser = strings.NewReplacer("\\\\", "\\", "\\n", "\n", "\\,", ",")
+
+func parseValue(v string) string {
+	return valueParser.Replace(v)
 }

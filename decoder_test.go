@@ -96,3 +96,15 @@ func TestDecoder(t *testing.T) {
 		}
 	}
 }
+
+func TestParseLine_escaped(t *testing.T) {
+	l := "NOTE:Mythical Manager\\nHyjinx Software Division\\nBabsCo\\, Inc.\\n"
+	expectedKey := "NOTE"
+	expectedValue := "Mythical Manager\nHyjinx Software Division\nBabsCo, Inc.\n"
+
+	if key, field, err := parseLine(l); err != nil {
+		t.Fatal("Expected no error while parsing line, got:", err)
+	} else if key != expectedKey || field.Value != expectedValue {
+		t.Errorf("parseLine(%q): expected (%q, %q), got (%q, %q)", l, expectedKey, expectedValue, key, field.Value)
+	}
+}
