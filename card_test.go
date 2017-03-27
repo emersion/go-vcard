@@ -296,9 +296,9 @@ func TestCard_Address(t *testing.T) {
 
 	added := &Address{
 		StreetAddress: "1 Trafalgar Square",
-		Locality: "London",
-		PostalCode: "WC2N",
-		Country: "United Kingdom",
+		Locality:      "London",
+		PostalCode:    "WC2N",
+		Country:       "United Kingdom",
 	}
 	card.AddAddress(added)
 
@@ -318,7 +318,7 @@ func TestCard_Address(t *testing.T) {
 	}
 }
 
-func TestCard_Revision( t*testing.T) {
+func TestCard_Revision(t *testing.T) {
 	card := make(Card)
 
 	if rev, err := card.Revision(); err != nil {

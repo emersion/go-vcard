@@ -69,7 +69,7 @@ END:VCARD
 
 var testCardLineFolding = Card{
 	"VERSION": {{Value: "4.0"}},
-	"NOTE": {{Value: "This is a long description that exists on a long line."}},
+	"NOTE":    {{Value: "This is a long description that exists on a long line."}},
 }
 
 var decoderTests = []struct {
