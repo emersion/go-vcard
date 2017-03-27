@@ -57,6 +57,21 @@ IMPP;X-SERVICE-TYPE=Skype;type=HOME;type=pref:skype:joe.bloggs
 X-SOCIALPROFILE;type=twitter:https://twitter.com/joebloggs
 END:VCARD`
 
+var testCardLineFoldingString = `BEGIN:VCARD
+VERSION:4.0
+
+NOTE:This is a long description
+  that exists o
+ n a long line.
+
+END:VCARD
+`
+
+var testCardLineFolding = Card{
+	"VERSION": {{Value: "4.0"}},
+	"NOTE": {{Value: "This is a long description that exists on a long line."}},
+}
+
 var decoderTests = []struct {
 	s    string
 	card Card
@@ -65,6 +80,7 @@ var decoderTests = []struct {
 	{testCardHandmadeString, testCardHandmade},
 	{testCardGoogleString, testCardGoogle},
 	{testCardAppleString, testCardApple},
+	{testCardLineFoldingString, testCardLineFolding},
 }
 
 func TestDecoder(t *testing.T) {

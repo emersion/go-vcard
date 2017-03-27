@@ -9,12 +9,45 @@ import (
 
 // A Decoder parses cards.
 type Decoder struct {
-	s *bufio.Scanner
+	r *bufio.Reader
 }
 
 // NewDecoder creates a new Decoder reading cards from an io.Reader.
 func NewDecoder(r io.Reader) *Decoder {
-	return &Decoder{s: bufio.NewScanner(r)}
+	return &Decoder{r: bufio.NewReader(r)}
+}
+
+func (dec *Decoder) readLine() (string, error) {
+	l, err := dec.r.ReadString('\n')
+	if err != nil {
+		return l, err
+	}
+	l = strings.TrimRight(l, "\r\n")
+
+	for {
+		next, err := dec.r.Peek(1)
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return l, err
+		}
+
+		if ch := next[0]; ch != ' ' && ch != '\t' {
+			break
+		}
+
+		if _, err := dec.r.Discard(1); err != nil {
+			return l, err
+		}
+
+		folded, err := dec.r.ReadString('\n')
+		if err != nil {
+			return l, err
+		}
+		l += strings.TrimRight(folded, "\r\n")
+	}
+
+	return l, nil
 }
 
 // Decode parses a single card.
@@ -22,10 +55,12 @@ func (dec *Decoder) Decode() (Card, error) {
 	card := make(Card)
 
 	hasHeader := false
-	for dec.s.Scan() {
-		l := strings.TrimSpace(dec.s.Text())
-		if l == "" {
-			continue
+	for {
+		l, err := dec.readLine()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return card, err
 		}
 
 		k, f, err := parseLine(l)
@@ -53,7 +88,7 @@ func (dec *Decoder) Decode() (Card, error) {
 		card[k] = append(card[k], f)
 	}
 
-	return card, dec.s.Err()
+	return card, nil
 }
 
 func parseLine(l string) (key string, field *Field, err error) {
