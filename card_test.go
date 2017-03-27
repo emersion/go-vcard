@@ -31,7 +31,7 @@ var testCardHandmade = Card{
 	}},
 	"TEL": []*Field{{
 		Value:  "tel:+44 20 1234 5678",
-		Params: Params{"TYPE": {"\"cell", "home\""}, "PREF": {"1"}},
+		Params: Params{"TYPE": {"cell", "home"}, "PREF": {"1"}},
 	}},
 	"ADR": []*Field{{
 		Value:  ";;1 Trafalgar Square;London;;WC2N;United Kingdom",

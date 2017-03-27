@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"io"
+	"strconv"
 	"strings"
 )
 
@@ -98,53 +99,125 @@ func (dec *Decoder) Decode() (Card, error) {
 }
 
 func parseLine(l string) (key string, field *Field, err error) {
-	kv := strings.SplitN(l, ":", 2)
-	if len(kv) < 2 {
-		return l, nil, errors.New("vcard: invalid field")
+	field = new(Field)
+	field.Group, l = parseGroup(l)
+	key, hasParams, l, err := parseKey(l)
+	if err != nil {
+		return
 	}
 
-	field = new(Field)
-	field.Value = parseValue(kv[1])
-	kparams := strings.Split(kv[0], ";")
-
-	key, field.Group = parseKey(kparams[0])
-
-	if len(kparams) > 1 {
-		field.Params = make(Params)
-		for i := 1; i < len(kparams); i++ {
-			pk, pvs := parseParam(kparams[i])
-			for i, pv := range pvs {
-				pvs[i] = parseValue(pv)
-			}
-			field.Params[pk] = append(field.Params[pk], pvs...)
+	if hasParams {
+		field.Params, l, err = parseParams(l)
+		if err != nil {
+			return
 		}
 	}
 
+	field.Value = parseValue(l)
 	return
 }
 
-func parseKey(s string) (key, group string) {
-	parts := strings.SplitN(s, ".", 2)
-	if len(parts) < 2 {
-		key = s
-	} else {
-		group = parts[0]
-		key = parts[1]
+func parseGroup(s string) (group, tail string) {
+	i := strings.IndexAny(s, ".;:")
+	if i < 0 || s[i] != '.' {
+		return "", s
 	}
-	key = strings.ToUpper(key)
-	return
+	return s[:i], s[i+1:]
 }
 
-func parseParam(s string) (k string, vs []string) {
-	kv := strings.SplitN(s, "=", 2)
-	if len(kv) < 2 {
-		return s, nil
+func parseKey(s string) (key string, params bool, tail string, err error) {
+	i := strings.IndexAny(s, ";:")
+	if i < 0 {
+		err = errors.New("vcard: invalid property key")
+		return
 	}
-	return strings.ToUpper(kv[0]), strings.Split(kv[1], ",")
+	return strings.ToUpper(s[:i]), s[i] == ';', s[i+1:], nil
+}
+
+func parseParams(s string) (params Params, tail string, err error) {
+	tail = s
+	params = make(Params)
+	for tail != "" {
+		i := strings.IndexAny(tail, "=;:")
+		if i < 0 {
+			err = errors.New("vcard: malformed parameters")
+			return
+		}
+		if tail[i] == ';' {
+			tail = tail[i+1:]
+			continue
+		}
+
+		k := strings.ToUpper(tail[:i])
+
+		var values []string
+		var more bool
+		values, more, tail, err = parseParamValues(tail[i+1:])
+		if err != nil {
+			return
+		}
+
+		params[k] = append(params[k], values...)
+
+		if !more {
+			break
+		}
+	}
+	return
 }
 
 var valueParser = strings.NewReplacer("\\\\", "\\", "\\n", "\n", "\\,", ",")
 
-func parseValue(v string) string {
-	return valueParser.Replace(v)
+func parseParamValues(s string) (values []string, more bool, tail string, err error) {
+	if s == "" {
+		return
+	}
+	quote := s[0]
+
+	var vs string
+	if quote == '"' {
+		vs, tail, err = parseQuoted(s[1:], quote)
+		if tail == "" || (tail[0] != ';' && tail[0] != ':') {
+			err = errors.New("vcard: malformed quoted parameter value")
+			return
+		}
+		more = tail[0] != ':'
+		tail = tail[1:]
+	} else {
+		i := strings.IndexAny(s, ";:")
+		if i < 0 {
+			return
+		}
+		vs, more, tail = s[:i], s[i] != ':', s[i+1:]
+	}
+
+	values = strings.Split(vs, ",")
+	for i, value := range values {
+		values[i] = parseValue(value)
+	}
+	return
+}
+
+func parseQuoted(s string, quote byte) (value, tail string, err error) {
+	tail = s
+	var buf []rune
+	for tail != "" {
+		if tail[0] == quote {
+			tail = tail[1:]
+			break
+		}
+
+		var r rune
+		r, _, tail, err = strconv.UnquoteChar(tail, quote)
+		if err != nil {
+			return
+		}
+		buf = append(buf, r)
+	}
+	value = string(buf)
+	return
+}
+
+func parseValue(s string) string {
+	return valueParser.Replace(s)
 }

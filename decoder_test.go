@@ -93,6 +93,9 @@ func TestDecoder(t *testing.T) {
 		}
 		if !reflect.DeepEqual(card, test.card) {
 			t.Errorf("Invalid parsed card: expected \n%+v\n but got \n%+v", test.card, card)
+			for k, fields := range test.card {
+				t.Log(k, reflect.DeepEqual(fields, card[k]), fields[0], card[k][0])
+			}
 		}
 	}
 }
