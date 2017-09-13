@@ -93,6 +93,9 @@ func (dec *Decoder) Decode() (Card, error) {
 	}
 
 	if !hasEnd {
+		if !hasBegin {
+			return nil, io.EOF
+		}
 		return card, errors.New("vcard: no END field found")
 	}
 	return card, nil
