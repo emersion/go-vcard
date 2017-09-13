@@ -1,6 +1,7 @@
 package vcard
 
 import (
+	"errors"
 	"io"
 	"strings"
 )
@@ -15,23 +16,23 @@ func NewEncoder(w io.Writer) *Encoder {
 	return &Encoder{w}
 }
 
-// Encode formats a card.
+// Encode formats a card. The card must have a FieldVersion field.
 func (enc *Encoder) Encode(c Card) error {
 	begin := "BEGIN:VCARD\r\n"
 	if _, err := io.WriteString(enc.w, begin); err != nil {
 		return err
 	}
 
-	version := c.Get("VERSION")
+	version := c.Get(FieldVersion)
 	if version == nil {
-		version = &Field{Value: "4.0"}
+		return errors.New("vcard: VERSION field missing")
 	}
-	if _, err := io.WriteString(enc.w, formatLine("VERSION", version)+"\r\n"); err != nil {
+	if _, err := io.WriteString(enc.w, formatLine(FieldVersion, version)+"\r\n"); err != nil {
 		return err
 	}
 
 	for k, fields := range c {
-		if strings.EqualFold(k, "VERSION") {
+		if strings.EqualFold(k, FieldVersion) {
 			continue
 		}
 		for _, f := range fields {
