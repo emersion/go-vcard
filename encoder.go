@@ -23,6 +23,9 @@ func (enc *Encoder) Encode(c Card) error {
 	}
 
 	version := c.Get("VERSION")
+	if version == nil {
+		version = &Field{Value: "4.0"}
+	}
 	if _, err := io.WriteString(enc.w, formatLine("VERSION", version)+"\r\n"); err != nil {
 		return err
 	}
