@@ -32,7 +32,7 @@ func ExampleNewDecoder() {
 func ExampleNewEncoder() {
 	destFile, err := os.Create("new_cards.vcf")
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	defer destFile.Close()
 
@@ -47,7 +47,7 @@ func ExampleNewEncoder() {
 		card vcard.Card
 
 		// buffer the writes to save disk I/O time
-		writeBuffer = bufio.NewWriter(writeTo)
+		writeBuffer = bufio.NewWriter(destFile)
 
 		// destination where the vcard will be encoded to
 		writer = vcard.NewEncoder(writeBuffer)
@@ -55,15 +55,19 @@ func ExampleNewEncoder() {
 
 	for _, entry := range data {
 		contact := NewContact(entry)
-		card[vcard.FieldFormattedName] = contact.ReadFormattedName(contactModel)
-		card[vcard.FieldName] = contact.ReadName(contactModel)
-		card[vcard.FieldTelephone] = contact.ReadTelephone(contactModel)
+		card[vcard.FieldFormattedName] = contact.ReadFormattedName()
+		card[vcard.FieldName] = contact.ReadName()
+		card[vcard.FieldTelephone] = contact.ReadTelephone()
 		vcard.ToV4(card)
 		err := writer.Encode(card)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 
+	}
+	err = writeBuffer.Flush()
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
