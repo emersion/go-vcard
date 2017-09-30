@@ -36,7 +36,7 @@ func ExampleNewEncoder() {
 	}
 	defer destFile.Close()
 
-	data := [][]string {
+	data := [][4]string {
 		{"John", "Webber", "Maxwell", "(+1) 199 8714",},
 		{"Donald", "", "Ron", "(+44) 421 8913"},
 		{"Eric", "E.", "Peter", "(+37) 221 9903",},
@@ -83,7 +83,7 @@ type Contact struct {
 
 // ReadName formats a Contact object into a []*vcard.Field object containing the
 // name of the contact with its components
-func (c *contact.Contact) ReadName() []*vcard.Field {
+func (c *Contact) ReadName() []*vcard.Field {
 	return []*vcard.Field{
 		&vcard.Field{
 			Value: c.FirstName + ";" + c.LastName + ";" + c.MiddleName,
@@ -98,7 +98,7 @@ func (c *contact.Contact) ReadName() []*vcard.Field {
 
 // ReadFormattedName formats a Contact object into a []*vcard.Field object containing
 // the formatted name of the contact
-func (c *contact.Contact) ReadFormattedName() []*vcard.Field {
+func (c *Contact) ReadFormattedName() []*vcard.Field {
 	return []*vcard.Field{
 		&vcard.Field{
 			Value: c.FirstName + " " + c.LastName + " " + c.MiddleName,
@@ -107,7 +107,7 @@ func (c *contact.Contact) ReadFormattedName() []*vcard.Field {
 }
 
 // ReadTelephone formats a telephone number string into a vcard.Field object
-func (c *contact.Contact) ReadTelephone() []*vcard.Field {
+func (c *Contact) ReadTelephone() []*vcard.Field {
 	return []*vcard.Field{
 		&vcard.Field{
 			Value: c.Telephone,
