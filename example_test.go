@@ -33,7 +33,7 @@ func ExampleNewDecoder() {
 // encoding a vcard can be done using the following method
 
 func ExampleNewEncoder() {
-	destFile, err := os.Create("new_cards.vcf")
+	destFile, err := os.Create("cards.vcf")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,14 +61,16 @@ func ExampleNewEncoder() {
 	for _, entry := range contacts {
 		// set only the value of a field by using card.SetValue. This does not set
 		// parameters
-		card.SetValue(vcard.FieldFormattedName, strings.Join(entry[:3]), " ")
+		card.SetValue(vcard.FieldFormattedName, strings.Join(entry[:3], " "))
 		card.SetValue(vcard.FieldTelephone, entry[3])
 
 		// set the value of a field and other parameters by using card.Set
-		card.Set(vcard.FieldName, *vcard.Field{
+		card.Set(vcard.FieldName, &vcard.Field{
 			Value: strings.Join(entry[:3], ";"),
-			Params: []string{
-				vcard.ParamSortAs: entry[0] + " " + entry[2],
+			Params: map[string]string{
+				vcard.ParamSortAs: []string{
+					entry[0] + " " + entry[2],
+				},
 			},
 		})
 
