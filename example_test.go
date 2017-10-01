@@ -1,10 +1,11 @@
 package vcard_test
 
 import (
+	"bufio"
 	"io"
 	"log"
 	"os"
-	"bufio"
+	"strings"
 
 	"github.com/emersion/go-vcard"
 )
@@ -29,6 +30,8 @@ func ExampleNewDecoder() {
 	}
 }
 
+// encoding a vcard can be done using the following method
+
 func ExampleNewEncoder() {
 	destFile, err := os.Create("new_cards.vcf")
 	if err != nil {
@@ -36,10 +39,12 @@ func ExampleNewEncoder() {
 	}
 	defer destFile.Close()
 
-	data := [][4]string {
-		{"John", "Webber", "Maxwell", "(+1) 199 8714",},
+	// data in order: first name, middle name, last name, telephone number
+	contacts := [][4]string{
+		{"John", "Webber", "Maxwell", "(+1) 199 8714"},
 		{"Donald", "", "Ron", "(+44) 421 8913"},
-		{"Eric", "E.", "Peter", "(+37) 221 9903",},
+		{"Eric", "E.", "Peter", "(+37) 221 9903"},
+		{"Nelson", "D.", "Patrick", "(+1) 122 8810"},
 	}
 
 	var (
@@ -53,11 +58,21 @@ func ExampleNewEncoder() {
 		writer = vcard.NewEncoder(writeBuffer)
 	)
 
-	for _, entry := range data {
-		contact := NewContact(entry)
-		card[vcard.FieldFormattedName] = contact.ReadFormattedName()
-		card[vcard.FieldName] = contact.ReadName()
-		card[vcard.FieldTelephone] = contact.ReadTelephone()
+	for _, entry := range contacts {
+		// set only the value of a field by using card.SetValue. This does not set
+		// parameters
+		card.SetValue(vcard.FieldFormattedName, strings.Join(entry[:3]), " ")
+		card.SetValue(vcard.FieldTelephone, entry[3])
+
+		// set the value of a field and other parameters by using card.Set
+		card.Set(vcard.FieldName, *vcard.Field{
+			Value: strings.Join(entry[:3], ";"),
+			Params: []string{
+				vcard.ParamSortAs: entry[0] + " " + entry[2],
+			},
+		})
+
+		// make the vCard version 4 compliant
 		vcard.ToV4(card)
 		err := writer.Encode(card)
 		if err != nil {
@@ -65,64 +80,10 @@ func ExampleNewEncoder() {
 		}
 
 	}
+
+	// write all data in the buffer to disk
 	err = writeBuffer.Flush()
 	if err != nil {
 		log.Fatal(err)
 	}
 }
-
-// encoding a vcard can be done using the following method
-
-// Contact is our model for contact data
-type Contact struct {
-	FirstName  string
-	MiddleName string
-	LastName   string
-	Telephone  string
-}
-
-// ReadName formats a Contact object into a []*vcard.Field object containing the
-// name of the contact with its components
-func (c *Contact) ReadName() []*vcard.Field {
-	return []*vcard.Field{
-		&vcard.Field{
-			Value: c.FirstName + ";" + c.LastName + ";" + c.MiddleName,
-			Params: map[string][]string{
-				vcard.ParamSortAs: []string{
-					c.FirstName + " " + c.LastName,
-				},
-			},
-		},
-	}
-}
-
-// ReadFormattedName formats a Contact object into a []*vcard.Field object containing
-// the formatted name of the contact
-func (c *Contact) ReadFormattedName() []*vcard.Field {
-	return []*vcard.Field{
-		&vcard.Field{
-			Value: c.FirstName + " " + c.LastName + " " + c.MiddleName,
-		},
-	}
-}
-
-// ReadTelephone formats a telephone number string into a vcard.Field object
-func (c *Contact) ReadTelephone() []*vcard.Field {
-	return []*vcard.Field{
-		&vcard.Field{
-			Value: c.Telephone,
-		},
-	}
-}
-
-// NewContact constructs a Contact object
-func NewContact(strslc [4]string) *Contact {
-	fn, mn, ln, tel := strslc[0], strslc[1], strslc[2], strslc[3]
-	return &Contact{
-		FirstName:  fn,
-		MiddleName: mn,
-		LastName:   ln,
-		Telephone:  tel,
-	}
-}
-
