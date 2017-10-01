@@ -1,7 +1,6 @@
 package vcard_test
 
 import (
-	"bufio"
 	"io"
 	"log"
 	"os"
@@ -30,7 +29,7 @@ func ExampleNewDecoder() {
 	}
 }
 
-// encoding a vcard can be done using the following method
+// encoding a vcard can be done as follows
 
 func ExampleNewEncoder() {
 	destFile, err := os.Create("cards.vcf")
@@ -51,23 +50,20 @@ func ExampleNewEncoder() {
 		// card is a map of strings to []*vcard.Field objects
 		card vcard.Card
 
-		// buffer the writes to save disk I/O time
-		writeBuffer = bufio.NewWriter(destFile)
-
 		// destination where the vcard will be encoded to
-		writer = vcard.NewEncoder(writeBuffer)
+		enc = vcard.NewEncoder(destFile)
 	)
 
 	for _, entry := range contacts {
-		// set only the value of a field by using card.SetValue. This does not set
-		// parameters
+		// set only the value of a field by using card.SetValue.
+		// This does not set parameters
 		card.SetValue(vcard.FieldFormattedName, strings.Join(entry[:3], " "))
 		card.SetValue(vcard.FieldTelephone, entry[3])
 
 		// set the value of a field and other parameters by using card.Set
 		card.Set(vcard.FieldName, &vcard.Field{
 			Value: strings.Join(entry[:3], ";"),
-			Params: map[string]string{
+			Params: map[string][]string{
 				vcard.ParamSortAs: []string{
 					entry[0] + " " + entry[2],
 				},
@@ -76,16 +72,9 @@ func ExampleNewEncoder() {
 
 		// make the vCard version 4 compliant
 		vcard.ToV4(card)
-		err := writer.Encode(card)
+		err := enc.Encode(card)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-	}
-
-	// write all data in the buffer to disk
-	err = writeBuffer.Flush()
-	if err != nil {
-		log.Fatal(err)
 	}
 }
