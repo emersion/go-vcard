@@ -103,7 +103,7 @@ func (dec *Decoder) Decode() (Card, error) {
 	return card, nil
 }
 
-const placeholder = "💩"
+const placeholder = "\uFFFD"
 const escapedComma = `\,`
 const comma = `,`
 
