@@ -66,10 +66,12 @@ func (dec *Decoder) Decode() (Card, error) {
 			return card, err
 		}
 
-		k, f, err := parseLine(l)
+		k, fields, err := parseLine(l)
 		if err != nil {
 			continue
 		}
+
+		f := fields[0]
 
 		if !hasBegin {
 			if k == "BEGIN" {
@@ -89,7 +91,7 @@ func (dec *Decoder) Decode() (Card, error) {
 			break
 		}
 
-		card[k] = append(card[k], f)
+		card[k] = append(card[k], fields...)
 	}
 
 	if !hasEnd {
@@ -101,8 +103,13 @@ func (dec *Decoder) Decode() (Card, error) {
 	return card, nil
 }
 
-func parseLine(l string) (key string, field *Field, err error) {
-	field = new(Field)
+const placeholder = "💩"
+const escapedComma = `\,`
+const comma = `,`
+
+func parseLine(l string) (key string, fields []*Field, err error) {
+	fields = []*Field{}
+	field := new(Field)
 	field.Group, l = parseGroup(l)
 	key, hasParams, l, err := parseKey(l)
 	if err != nil {
@@ -116,7 +123,27 @@ func parseLine(l string) (key string, field *Field, err error) {
 		}
 	}
 
-	field.Value = parseValue(l)
+	v := strings.Replace(l, escapedComma, placeholder, -1)
+
+	originalValue := parseValue(v)
+
+	values := strings.Split(originalValue, ",")
+
+	if len(values) > 1 {
+		for _, value := range values {
+			f := new(Field)
+			value = strings.Replace(value, placeholder, comma, -1)
+			f.Value = strings.TrimSpace(value)
+			f.Group = field.Group
+			f.Params = field.Params
+			fields = append(fields, f)
+		}
+	} else {
+		originalValue = strings.Replace(originalValue, placeholder, comma, -1)
+		field.Value = originalValue
+		fields = append(fields, field)
+	}
+
 	return
 }
 
