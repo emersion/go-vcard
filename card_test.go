@@ -332,6 +332,6 @@ func TestCard_Revision(t *testing.T) {
 	if rev, err := card.Revision(); err != nil {
 		t.Fatal("Expected no error when getting revision of a populated card, got:", err)
 	} else if !rev.Equal(rev) {
-		t.Error("Expected revision to be %v but got %v", expected, rev)
+		t.Errorf("Expected revision to be %v but got %v", expected, rev)
 	}
 }
