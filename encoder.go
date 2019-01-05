@@ -3,6 +3,7 @@ package vcard
 import (
 	"errors"
 	"io"
+	"sort"
 	"strings"
 )
 
@@ -31,7 +32,13 @@ func (enc *Encoder) Encode(c Card) error {
 		return err
 	}
 
-	for k, fields := range c {
+	var keys []string
+	for k := range c {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		fields := c[k]
 		if strings.EqualFold(k, FieldVersion) {
 			continue
 		}
