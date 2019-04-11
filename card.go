@@ -13,7 +13,8 @@ const (
 	Extension = "vcf"
 )
 
-const timestampLayout = "20060102T150405Z"
+const RevTimestampLayout = "20060102T150405Z"
+const BirthDayTimestampLayout = "20060102"
 
 // Card property parameters.
 const (
@@ -223,7 +224,7 @@ func (c Card) Names() []*Name {
 
 	names := make([]*Name, len(ns))
 	for i, n := range ns {
-		names[i] = newName(n)
+		names[i] = NewNameField(n)
 	}
 	return names
 }
@@ -235,12 +236,12 @@ func (c Card) Name() *Name {
 	if n == nil {
 		return nil
 	}
-	return newName(n)
+	return NewNameField(n)
 }
 
 // AddName adds the specified name to the list of names.
 func (c Card) AddName(name *Name) {
-	c.Add(FieldName, name.field())
+	c.Add(FieldName, name.ToField())
 }
 
 // Gender returns this card's gender.
@@ -268,7 +269,7 @@ func (c Card) Addresses() []*Address {
 
 	addresses := make([]*Address, len(adrs))
 	for i, adr := range adrs {
-		addresses[i] = newAddress(adr)
+		addresses[i] = NewAddressField(adr)
 	}
 	return addresses
 }
@@ -280,12 +281,12 @@ func (c Card) Address() *Address {
 	if adr == nil {
 		return nil
 	}
-	return newAddress(adr)
+	return NewAddressField(adr)
 }
 
 // AddAddress adds an address to the list of addresses.
 func (c Card) AddAddress(address *Address) {
-	c.Add(FieldAddress, address.field())
+	c.Add(FieldAddress, address.ToField())
 }
 
 // Categories returns category information about the card, also known as "tags".
@@ -304,12 +305,17 @@ func (c Card) Revision() (time.Time, error) {
 	if rev == "" {
 		return time.Time{}, nil
 	}
-	return time.Parse(timestampLayout, rev)
+	return time.Parse(RevTimestampLayout, rev)
 }
 
 // SetRevision sets revision information about the current card.
 func (c Card) SetRevision(t time.Time) {
-	c.SetValue(FieldRevision, t.Format(timestampLayout))
+	c.SetValue(FieldRevision, t.Format(RevTimestampLayout))
+}
+
+// SetBirthday sets the Birthday information from a golang time type
+func (c Card) SetBirthDay(t time.Time) {
+	c.SetValue(FieldBirthday, t.Format(BirthDayTimestampLayout))
 }
 
 // A field contains a value and some parameters.
@@ -317,6 +323,11 @@ type Field struct {
 	Value  string
 	Params Params
 	Group  string
+}
+
+//Properly instantiate a new Field and return it's Pointer
+func NewField() *Field {
+	return &Field{Params: make(Params)}
 }
 
 // Params is a set of field parameters.
@@ -424,7 +435,7 @@ type Name struct {
 	HonorificSuffix string
 }
 
-func newName(field *Field) *Name {
+func NewNameField(field *Field) *Name {
 	components := strings.Split(field.Value, ";")
 	return &Name{
 		field,
@@ -436,7 +447,13 @@ func newName(field *Field) *Name {
 	}
 }
 
-func (n *Name) field() *Field {
+func NewName() *Name {
+	return &Name{
+		Field: NewField(),
+	}
+}
+
+func (n *Name) ToField() *Field {
 	if n.Field == nil {
 		n.Field = new(Field)
 	}
@@ -475,7 +492,7 @@ type Address struct {
 	Country         string
 }
 
-func newAddress(field *Field) *Address {
+func NewAddressField(field *Field) *Address {
 	components := strings.Split(field.Value, ";")
 	return &Address{
 		field,
@@ -489,7 +506,13 @@ func newAddress(field *Field) *Address {
 	}
 }
 
-func (a *Address) field() *Field {
+func NewAddress() *Address {
+	return &Address{
+		Field: NewField(),
+	}
+}
+
+func (a *Address) ToField() *Field {
 	if a.Field == nil {
 		a.Field = new(Field)
 	}
