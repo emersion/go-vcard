@@ -370,9 +370,9 @@ type Kind string
 // Values for FieldKind.
 const (
 	KindIndividual   Kind = "individual"
-	KindGroup             = "group"
-	KindOrganization      = "org"
-	KindLocation          = "location"
+	KindGroup        Kind = "group"
+	KindOrganization Kind = "org"
+	KindLocation     Kind = "location"
 )
 
 // Values for ParamType.
@@ -455,11 +455,11 @@ type Sex string
 
 const (
 	SexUnspecified Sex = ""
-	SexFemale          = "F"
-	SexMale            = "M"
-	SexOther           = "O"
-	SexNone            = "N"
-	SexUnknown         = "U"
+	SexFemale      Sex = "F"
+	SexMale        Sex = "M"
+	SexOther       Sex = "O"
+	SexNone        Sex = "N"
+	SexUnknown     Sex = "U"
 )
 
 // An Address is a delivery address.
