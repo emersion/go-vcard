@@ -240,7 +240,7 @@ func (c Card) Name() *Name {
 
 // AddName adds the specified name to the list of names.
 func (c Card) AddName(name *Name) {
-	c.Add(FieldName, name.field())
+	c.Add(FieldName, name.Encode())
 }
 
 // Gender returns this card's gender.
@@ -285,7 +285,7 @@ func (c Card) Address() *Address {
 
 // AddAddress adds an address to the list of addresses.
 func (c Card) AddAddress(address *Address) {
-	c.Add(FieldAddress, address.field())
+	c.Add(FieldAddress, address.Encode())
 }
 
 // Categories returns category information about the card, also known as "tags".
@@ -436,7 +436,8 @@ func newName(field *Field) *Name {
 	}
 }
 
-func (n *Name) field() *Field {
+//Encode allows you to update the underlying field
+func (n *Name) Encode() *Field {
 	if n.Field == nil {
 		n.Field = new(Field)
 	}
@@ -489,7 +490,8 @@ func newAddress(field *Field) *Address {
 	}
 }
 
-func (a *Address) field() *Field {
+//Encode allows you to update the underlying field
+func (a *Address) Encode() *Field {
 	if a.Field == nil {
 		a.Field = new(Field)
 	}
