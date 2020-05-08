@@ -126,7 +126,7 @@ func (c Card) Preferred(k string) *Field {
 	}
 
 	field := fields[0]
-	max := 0
+	min := 100
 	for _, f := range fields {
 		n := 0
 		if pref := f.Params.Get(ParamPreferred); pref != "" {
@@ -136,8 +136,8 @@ func (c Card) Preferred(k string) *Field {
 			n = 1
 		}
 
-		if n > max {
-			max = n
+		if n < min {
+			min = n
 			field = f
 		}
 	}
