@@ -187,8 +187,8 @@ func TestCard_Preferred(t *testing.T) {
 		},
 		{
 			"EMAIL": []*Field{
-				{Value: "me@example.org", Params: Params{"TYPE": {"home"}, "PREF": {"25"}}},
-				{Value: "me@example.com", Params: Params{"TYPE": {"work"}, "PREF": {"50"}}},
+				{Value: "me@example.org", Params: Params{"TYPE": {"home"}, "PREF": {"50"}}},
+				{Value: "me@example.com", Params: Params{"TYPE": {"work"}, "PREF": {"25"}}},
 			},
 		},
 		// v3.0

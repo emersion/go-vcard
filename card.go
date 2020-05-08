@@ -128,7 +128,7 @@ func (c Card) Preferred(k string) *Field {
 	field := fields[0]
 	min := 100
 	for _, f := range fields {
-		n := 0
+		n := 100
 		if pref := f.Params.Get(ParamPreferred); pref != "" {
 			n, _ = strconv.Atoi(pref)
 		} else if f.Params.HasType("pref") {
