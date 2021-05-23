@@ -78,6 +78,66 @@ var testCardGoogle = Card{
 	},
 }
 
+var testCardGoogleMultiEmail = Card{
+	"VERSION": []*Field{{Value: "3.0"}},
+	"N":       []*Field{{Value: "Bloggs;Joe;;;"}},
+	"FN":      []*Field{{Value: "Joe Bloggs"}},
+	"EMAIL": []*Field{{
+		Value:  "me@joebloggs.com",
+		Params: Params{"TYPE": {"INTERNET", "HOME"}},
+	},{
+		Value:  "joe@joebloggs.com",
+		Params: Params{"TYPE": {"INTERNET", "HOME"}},
+	}},
+	"TEL": []*Field{{
+		Value:  "+44 20 1234 5678",
+		Params: Params{"TYPE": {"CELL"}},
+	}},
+	"ADR": []*Field{{
+		Value:  ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
+		Params: Params{"TYPE": {"HOME"}},
+	}},
+	"URL": []*Field{
+		{Value: "http\\://joebloggs.com", Group: "item1"},
+		{Value: "http\\://twitter.com/test", Group: "item2"},
+	},
+	"X-SKYPE": []*Field{{Value: "joe.bloggs"}},
+	"X-ABLABEL": []*Field{
+		{Value: "_$!<HomePage>!$_", Group: "item1"},
+		{Value: "Twitter", Group: "item2"},
+	},
+}
+
+var testCardGoogleMultiEmailComma = Card{
+	"VERSION": []*Field{{Value: "3.0"}},
+	"N":       []*Field{{Value: "Bloggs;Joe;;;"}},
+	"FN":      []*Field{{Value: "Joe Bloggs"}},
+	"EMAIL": []*Field{{
+		Value:  "me@joebloggs.com",
+		Params: Params{"TYPE": {"INTERNET", "HOME"}},
+	},{
+		Value:  `joe@joebloggs,com`,
+		Params: Params{"TYPE": {"INTERNET", "HOME"}},
+	}},
+	"TEL": []*Field{{
+		Value:  "+44 20 1234 5678",
+		Params: Params{"TYPE": {"CELL"}},
+	}},
+	"ADR": []*Field{{
+		Value:  ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
+		Params: Params{"TYPE": {"HOME"}},
+	}},
+	"URL": []*Field{
+		{Value: "http\\://joebloggs.com", Group: "item1"},
+		{Value: "http\\://twitter.com/test", Group: "item2"},
+	},
+	"X-SKYPE": []*Field{{Value: "joe.bloggs"}},
+	"X-ABLABEL": []*Field{
+		{Value: "_$!<HomePage>!$_", Group: "item1"},
+		{Value: "Twitter", Group: "item2"},
+	},
+}
+
 var testCardApple = Card{
 	"VERSION": []*Field{{Value: "3.0"}},
 	"N":       []*Field{{Value: "Bloggs;Joe;;;"}},

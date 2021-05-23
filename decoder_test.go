@@ -43,6 +43,36 @@ item2.URL:http\://twitter.com/test
 item2.X-ABLabel:Twitter
 END:VCARD`
 
+// Google Contacts (15 November 2012)
+var testCardGoogleMultiValueString = `BEGIN:VCARD
+VERSION:3.0
+N:Bloggs;Joe;;;
+FN:Joe Bloggs
+EMAIL;TYPE=INTERNET;TYPE=HOME:me@joebloggs.com, joe@joebloggs.com
+TEL;TYPE=CELL:+44 20 1234 5678
+ADR;TYPE=HOME:;;1 Trafalgar Square;London;;WC2N;United Kingdom
+item1.URL:http\://joebloggs.com
+item1.X-ABLabel:_$!<HomePage>!$_
+X-SKYPE:joe.bloggs
+item2.URL:http\://twitter.com/test
+item2.X-ABLabel:Twitter
+END:VCARD`
+
+var testCardGoogleMultiValueWithCommaString = `BEGIN:VCARD
+VERSION:3.0
+N:Bloggs;Joe;;;
+FN:Joe Bloggs
+EMAIL;TYPE=INTERNET;TYPE=HOME:me@joebloggs.com, joe@joebloggs\,com
+TEL;TYPE=CELL:+44 20 1234 5678
+ADR;TYPE=HOME:;;1 Trafalgar Square;London;;WC2N;United Kingdom
+item1.URL:http\://joebloggs.com
+item1.X-ABLabel:_$!<HomePage>!$_
+X-SKYPE:joe.bloggs
+item2.URL:http\://twitter.com/test
+item2.X-ABLabel:Twitter
+END:VCARD`
+
+
 // Apple Contacts (version 7.1)
 var testCardAppleString = `BEGIN:VCARD
 VERSION:3.0
@@ -81,6 +111,8 @@ var decoderTests = []struct {
 	{testCardGoogleString, testCardGoogle},
 	{testCardAppleString, testCardApple},
 	{testCardLineFoldingString, testCardLineFolding},
+	{testCardGoogleMultiValueString, testCardGoogleMultiEmail},
+	{testCardGoogleMultiValueWithCommaString, testCardGoogleMultiEmailComma},
 }
 
 func TestDecoder(t *testing.T) {
@@ -134,9 +166,9 @@ func TestParseLine_escaped(t *testing.T) {
 	expectedKey := "NOTE"
 	expectedValue := "Mythical Manager\nHyjinx Software Division\nBabsCo, Inc.\n"
 
-	if key, field, err := parseLine(l); err != nil {
+	if key, fields, err := parseLine(l); err != nil {
 		t.Fatal("Expected no error while parsing line, got:", err)
-	} else if key != expectedKey || field.Value != expectedValue {
-		t.Errorf("parseLine(%q): expected (%q, %q), got (%q, %q)", l, expectedKey, expectedValue, key, field.Value)
+	} else if key != expectedKey || fields[0].Value != expectedValue {
+		t.Errorf("parseLine(%q): expected (%q, %q), got (%q, %q)", l, expectedKey, expectedValue, key, fields[0].Value)
 	}
 }
