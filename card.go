@@ -243,6 +243,11 @@ func (c Card) AddName(name *Name) {
 	c.Add(FieldName, name.field())
 }
 
+// SetName replaces the list of names with the single specified name.
+func (c Card) SetName(name *Name) {
+	c.Set(FieldName, name.field())
+}
+
 // Gender returns this card's gender.
 func (c Card) Gender() (sex Sex, identity string) {
 	v := c.Value(FieldGender)
@@ -286,6 +291,11 @@ func (c Card) Address() *Address {
 // AddAddress adds an address to the list of addresses.
 func (c Card) AddAddress(address *Address) {
 	c.Add(FieldAddress, address.field())
+}
+
+// SetAddress replaces the list of addresses with the single specified address.
+func (c Card) SetAddress(address *Address) {
+	c.Set(FieldAddress, address.field())
 }
 
 // Categories returns category information about the card, also known as "tags".
