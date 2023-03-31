@@ -187,6 +187,7 @@ func parseParamValues(s string) (values []string, more bool, tail string, err er
 	} else {
 		i := strings.IndexAny(s, ";:")
 		if i < 0 {
+			values = append(values, s)
 			return
 		}
 		vs, more, tail = s[:i], s[i] != ':', s[i+1:]
