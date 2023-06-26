@@ -48,7 +48,7 @@ func ExampleNewEncoder() {
 
 	var (
 		// card is a map of strings to []*vcard.Field objects
-		card vcard.Card
+		card = make(vcard.Card)
 
 		// destination where the vcard will be encoded to
 		enc = vcard.NewEncoder(destFile)
