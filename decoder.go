@@ -66,10 +66,12 @@ func (dec *Decoder) Decode() (Card, error) {
 			return card, err
 		}
 
-		k, f, err := parseLine(l)
+		k, fields, err := parseLine(l)
 		if err != nil {
 			continue
 		}
+
+		f := fields[0]
 
 		if !hasBegin {
 			if k == "BEGIN" {
@@ -89,7 +91,7 @@ func (dec *Decoder) Decode() (Card, error) {
 			break
 		}
 
-		card[k] = append(card[k], f)
+		card[k] = append(card[k], fields...)
 	}
 
 	if !hasEnd {
@@ -101,8 +103,36 @@ func (dec *Decoder) Decode() (Card, error) {
 	return card, nil
 }
 
-func parseLine(l string) (key string, field *Field, err error) {
-	field = new(Field)
+// stringsSplitUnescaped splits the string when "sep" is NOT escaped
+// (i.e. not precedeed by a[n unescaped] backslash)
+func stringsSplitUnescaped(s string, sep rune) []string {
+	n := strings.Count(s, string(sep))
+	if n <= 0 {
+		return []string{s}
+	}
+	ss := make([]string, 0, n) // might not be full if some sep are escaped
+	escaping := false
+	i := 0
+	for j, c := range s {
+		if escaping {
+			escaping = false
+			continue
+		}
+		switch c {
+		case '\\':
+			escaping = true
+		case sep:
+			ss = append(ss, s[i:j])
+			i = j + 1
+		}
+	}
+	ss = append(ss, s[i:])
+	return ss
+}
+
+func parseLine(l string) (key string, fields []*Field, err error) {
+	fields = []*Field{}
+	field := new(Field)
 	field.Group, l = parseGroup(l)
 	key, hasParams, l, err := parseKey(l)
 	if err != nil {
@@ -116,7 +146,15 @@ func parseLine(l string) (key string, field *Field, err error) {
 		}
 	}
 
-	field.Value = parseValue(l)
+	values := stringsSplitUnescaped(l, ',')
+
+	for _, value := range values {
+		f := new(Field)
+		f.Value = parseValue(value)
+		f.Group = field.Group
+		f.Params = field.Params
+		fields = append(fields, f)
+	}
 	return
 }
 
