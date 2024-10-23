@@ -1,6 +1,7 @@
 package vcard
 
 import (
+	"bytes"
 	"reflect"
 	"strings"
 	"testing"
@@ -34,6 +35,35 @@ VERSION:3.0
 N:Bloggs;Joe;;;
 FN:Joe Bloggs
 EMAIL;TYPE=INTERNET;TYPE=HOME:me@joebloggs.com
+TEL;TYPE=CELL:+44 20 1234 5678
+ADR;TYPE=HOME:;;1 Trafalgar Square;London;;WC2N;United Kingdom
+item1.URL:http\://joebloggs.com
+item1.X-ABLabel:_$!<HomePage>!$_
+X-SKYPE:joe.bloggs
+item2.URL:http\://twitter.com/test
+item2.X-ABLabel:Twitter
+END:VCARD`
+
+// Google Contacts (15 November 2012)
+var testCardGoogleMultiValueString = `BEGIN:VCARD
+VERSION:3.0
+N:Bloggs;Joe;;;
+FN:Joe Bloggs
+EMAIL;TYPE=INTERNET;TYPE=HOME:me@joebloggs.com, joe@joebloggs.com
+TEL;TYPE=CELL:+44 20 1234 5678
+ADR;TYPE=HOME:;;1 Trafalgar Square;London;;WC2N;United Kingdom
+item1.URL:http\://joebloggs.com
+item1.X-ABLabel:_$!<HomePage>!$_
+X-SKYPE:joe.bloggs
+item2.URL:http\://twitter.com/test
+item2.X-ABLabel:Twitter
+END:VCARD`
+
+var testCardGoogleMultiValueWithCommaString = `BEGIN:VCARD
+VERSION:3.0
+N:Bloggs;Joe;;;
+FN:Joe Bloggs
+EMAIL;TYPE=INTERNET;TYPE=HOME:me@joebloggs.com, joe@joebloggs\,com
 TEL;TYPE=CELL:+44 20 1234 5678
 ADR;TYPE=HOME:;;1 Trafalgar Square;London;;WC2N;United Kingdom
 item1.URL:http\://joebloggs.com
@@ -81,6 +111,8 @@ var decoderTests = []struct {
 	{testCardGoogleString, testCardGoogle},
 	{testCardAppleString, testCardApple},
 	{testCardLineFoldingString, testCardLineFolding},
+	{testCardGoogleMultiValueString, testCardGoogleMultiEmail},
+	{testCardGoogleMultiValueWithCommaString, testCardGoogleMultiEmailComma},
 }
 
 func TestDecoder(t *testing.T) {
@@ -94,7 +126,35 @@ func TestDecoder(t *testing.T) {
 		if !reflect.DeepEqual(card, test.card) {
 			t.Errorf("Invalid parsed card: expected \n%+v\n but got \n%+v", test.card, card)
 			for k, fields := range test.card {
-				t.Log(k, reflect.DeepEqual(fields, card[k]), fields[0], card[k][0])
+				if reflect.DeepEqual(fields, card[k]) {
+					continue
+				}
+				for i := range fields {
+					t.Log(k, i, fields[i], card[k][i])
+				}
+			}
+		}
+
+		var buf bytes.Buffer
+		err = NewEncoder(&buf).Encode(card)
+		if err != nil {
+			t.Fatal("Expected no error when encoding card, got:", err)
+		}
+		// the encoding is not canonical, so we can't compare it
+		// we re-decode the encoded part instead
+		cardReEncoded, err := NewDecoder(&buf).Decode()
+		if err != nil {
+			t.Fatal("Expected no error when re-decoding card, got:", err)
+		}
+		if !reflect.DeepEqual(cardReEncoded, test.card) {
+			t.Errorf("Invalid re-parsed card: expected \n%+v\n but got \n%+v", test.card, cardReEncoded)
+			for k, fields := range test.card {
+				if reflect.DeepEqual(fields, cardReEncoded[k]) {
+					continue
+				}
+				for i := range fields {
+					t.Log(k, i, fields[i], cardReEncoded[k][i])
+				}
 			}
 		}
 	}
@@ -132,7 +192,7 @@ func TestDecoder_invalid(t *testing.T) {
 func TestParseLine_escaped(t *testing.T) {
 	l := "NOTE:Mythical Manager\\nHyjinx Software Division\\nBabsCo\\, Inc.\\n"
 	expectedKey := "NOTE"
-	expectedValue := "Mythical Manager\nHyjinx Software Division\nBabsCo, Inc.\n"
+	expectedValue := NewFieldValue("Mythical Manager\nHyjinx Software Division\nBabsCo, Inc.\n")
 
 	if key, field, err := parseLine(l); err != nil {
 		t.Fatal("Expected no error while parsing line, got:", err)

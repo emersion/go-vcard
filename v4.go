@@ -9,7 +9,7 @@ import (
 // ToV4 converts a card to vCard version 4.
 func ToV4(card Card) {
 	version := card.Value(FieldVersion)
-	if strings.HasPrefix(version, "4.") {
+	if strings.HasPrefix(version.String(), "4.") {
 		return
 	}
 

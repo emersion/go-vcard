@@ -68,16 +68,10 @@ func formatLine(key string, field *Field) string {
 		}
 	}
 
-	s += ":" + formatValue(field.Value)
+	s += ":" + field.Value.String()
 	return s
 }
 
 func formatParam(k, v string) string {
-	return k + "=" + formatValue(v)
-}
-
-var valueFormatter = strings.NewReplacer("\\", "\\\\", "\n", "\\n", ",", "\\,")
-
-func formatValue(v string) string {
-	return valueFormatter.Replace(v)
+	return k + "=" + NewFieldValue(v).String()
 }

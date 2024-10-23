@@ -78,6 +78,60 @@ var testCardGoogle = Card{
 	},
 }
 
+var testCardGoogleMultiEmail = Card{
+	"VERSION": []*Field{{Value: "3.0"}},
+	"N":       []*Field{{Value: "Bloggs;Joe;;;"}},
+	"FN":      []*Field{{Value: "Joe Bloggs"}},
+	"EMAIL": []*Field{{
+		Value:  `me@joebloggs.com, joe@joebloggs.com`,
+		Params: Params{"TYPE": {"INTERNET", "HOME"}},
+	}},
+	"TEL": []*Field{{
+		Value:  "+44 20 1234 5678",
+		Params: Params{"TYPE": {"CELL"}},
+	}},
+	"ADR": []*Field{{
+		Value:  ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
+		Params: Params{"TYPE": {"HOME"}},
+	}},
+	"URL": []*Field{
+		{Value: "http\\://joebloggs.com", Group: "item1"},
+		{Value: "http\\://twitter.com/test", Group: "item2"},
+	},
+	"X-SKYPE": []*Field{{Value: "joe.bloggs"}},
+	"X-ABLABEL": []*Field{
+		{Value: "_$!<HomePage>!$_", Group: "item1"},
+		{Value: "Twitter", Group: "item2"},
+	},
+}
+
+var testCardGoogleMultiEmailComma = Card{
+	"VERSION": []*Field{{Value: "3.0"}},
+	"N":       []*Field{{Value: "Bloggs;Joe;;;"}},
+	"FN":      []*Field{{Value: "Joe Bloggs"}},
+	"EMAIL": []*Field{{
+		Value:  `me@joebloggs.com, joe@joebloggs\,com`,
+		Params: Params{"TYPE": {"INTERNET", "HOME"}},
+	}},
+	"TEL": []*Field{{
+		Value:  "+44 20 1234 5678",
+		Params: Params{"TYPE": {"CELL"}},
+	}},
+	"ADR": []*Field{{
+		Value:  ";;1 Trafalgar Square;London;;WC2N;United Kingdom",
+		Params: Params{"TYPE": {"HOME"}},
+	}},
+	"URL": []*Field{
+		{Value: "http\\://joebloggs.com", Group: "item1"},
+		{Value: "http\\://twitter.com/test", Group: "item2"},
+	},
+	"X-SKYPE": []*Field{{Value: "joe.bloggs"}},
+	"X-ABLABEL": []*Field{
+		{Value: "_$!<HomePage>!$_", Group: "item1"},
+		{Value: "Twitter", Group: "item2"},
+	},
+}
+
 var testCardApple = Card{
 	"VERSION": []*Field{{Value: "3.0"}},
 	"N":       []*Field{{Value: "Bloggs;Joe;;;"}},
@@ -145,7 +199,7 @@ func TestCard(t *testing.T) {
 			{Value: "me@example.com", Params: Params{"TYPE": {"work"}}},
 		},
 	}
-	expected := []string{"me@example.org", "me@example.com"}
+	expected := []FieldValue{"me@example.org", "me@example.com"}
 	if values := cardMultipleValues.Values(FieldEmail); !reflect.DeepEqual(expected, values) {
 		t.Errorf("Expected card emails to be %+v but got %+v", expected, values)
 	}
@@ -157,13 +211,13 @@ func TestCard(t *testing.T) {
 func TestCard_AddValue(t *testing.T) {
 	card := make(Card)
 
-	name1 := "Akiyama Mio"
+	name1 := FieldValue("Akiyama Mio")
 	card.AddValue("FN", name1)
 	if values := card.Values("FN"); len(values) != 1 || values[0] != name1 {
 		t.Errorf("Expected one FN value, got %v", values)
 	}
 
-	name2 := "Mio Akiyama"
+	name2 := FieldValue("Mio Akiyama")
 	card.AddValue("FN", name2)
 	if values := card.Values("FN"); len(values) != 2 || values[0] != name1 || values[1] != name2 {
 		t.Errorf("Expected two FN values, got %v", values)
@@ -334,4 +388,76 @@ func TestCard_Revision(t *testing.T) {
 	} else if !rev.Equal(rev) {
 		t.Errorf("Expected revision to be %v but got %v", expected, rev)
 	}
+}
+
+func TestCard_FieldValue(t *testing.T) {
+	fieldValues := map[FieldValue][]string{
+		"":                  {""},
+		",":                 {"", ""},
+		"\\,":               {","},
+		",,\\,,":            {"", "", ",", ""},
+		"geo:1.23\\,4.56":   {"geo:1.23,4.56"},
+		"geo:1.23,4.56":     {"geo:1.23", "4.56"},
+		"geo:1\\,23,4\\,56": {"geo:1,23", "4,56"},
+	}
+	for fv, parts := range fieldValues {
+		t.Run(fv.String(), func(t *testing.T) {
+			gotParts := fv.Values()
+			if !reflect.DeepEqual(parts, gotParts) {
+				t.Errorf("Expected parts to be %+v but got %+v", parts, gotParts)
+			}
+
+			gotFV := NewFieldValue(parts...)
+			if gotFV != fv {
+				t.Errorf("Expected FieldValue to be %+v but got %+v", fv, gotFV)
+			}
+		})
+	}
+}
+
+// go test -fuzztime=10s -fuzz=Card_FieldValueRaw
+func FuzzCard_FieldValueRaw(f *testing.F) {
+	f.Add(``)
+	f.Add(`123`)
+	f.Add(`1,2,3`)
+	f.Add(`1\abc`) // missing escaping of "\"
+	f.Add(`1\,2,3`)
+	f.Add(`1\\,2,3`)
+	f.Fuzz(func(t *testing.T, raw string) {
+		fv := FieldValue(raw)
+		parts := fv.Values()
+		got1 := NewFieldValue(parts...)
+		if got1 != fv {
+			// the raw value was wrongly escaped:
+			// "got" should now be correctly escaped
+			if len(got1) <= len(fv) {
+				t.Errorf("Expected a larger (escaped) string than %q, got %q", fv, got1)
+			}
+			// encode again and check that we get back the same (correctly escaped) raw value
+			got2 := NewFieldValue(got1.Values()...)
+			if got1 != got2 {
+				t.Errorf("Expected %q, got %q", got1, got2)
+			}
+		}
+	})
+}
+
+func FuzzCard_FieldValueParts(f *testing.F) {
+	f.Add("p0", "p1")
+	f.Add("1,2", "3")
+	f.Add("1\\,2", "3")
+	f.Add("1\\\\,2", "3")
+	f.Fuzz(func(t *testing.T, part0, part1 string) {
+		fv := NewFieldValue(part0, part1)
+		got := fv.Values()
+		if len(got) != 2 {
+			t.Fatalf("Expected 2 values, got %d: %v", len(got), got)
+		}
+		if got[0] != part0 {
+			t.Fatalf("Expected first value %q, got %q", part0, got[0])
+		}
+		if got[1] != part1 {
+			t.Fatalf("Expected first value %q, got %q", part1, got[1])
+		}
+	})
 }
