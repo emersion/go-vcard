@@ -51,7 +51,7 @@ var testValue = []struct {
 
 func TestFormatValue(t *testing.T) {
 	for _, test := range testValue {
-		if formatted := formatValue(test.v); formatted != test.formatted {
+		if formatted := NewFieldValue(test.v).String(); formatted != test.formatted {
 			t.Errorf("formatValue(%q): expected %q, got %q", test.v, test.formatted, formatted)
 		}
 	}

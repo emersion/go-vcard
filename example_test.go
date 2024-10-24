@@ -57,14 +57,14 @@ func ExampleNewEncoder() {
 	for _, entry := range contacts {
 		// set only the value of a field by using card.SetValue.
 		// This does not set parameters
-		card.SetValue(vcard.FieldFormattedName, strings.Join(entry[:3], " "))
-		card.SetValue(vcard.FieldTelephone, entry[3])
+		card.SetValue(vcard.FieldFormattedName, vcard.NewFieldValue(strings.Join(entry[:3], " ")))
+		card.SetValue(vcard.FieldTelephone, vcard.NewFieldValue(entry[3]))
 
 		// set the value of a field and other parameters by using card.Set
 		card.Set(vcard.FieldName, &vcard.Field{
-			Value: strings.Join(entry[:3], ";"),
+			Value: vcard.NewFieldValue(strings.Join(entry[:3], ";")),
 			Params: map[string][]string{
-				vcard.ParamSortAs: []string{
+				vcard.ParamSortAs: {
 					entry[0] + " " + entry[2],
 				},
 			},

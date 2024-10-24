@@ -73,7 +73,7 @@ func (dec *Decoder) Decode() (Card, error) {
 
 		if !hasBegin {
 			if k == "BEGIN" {
-				if strings.ToUpper(f.Value) != "VCARD" {
+				if strings.ToUpper(f.Value.String()) != "VCARD" {
 					return card, errors.New("vcard: invalid BEGIN value")
 				}
 				hasBegin = true
@@ -82,7 +82,7 @@ func (dec *Decoder) Decode() (Card, error) {
 				return card, errors.New("vcard: no BEGIN field found")
 			}
 		} else if k == "END" {
-			if strings.ToUpper(f.Value) != "VCARD" {
+			if strings.ToUpper(f.Value.String()) != "VCARD" {
 				return card, errors.New("vcard: invalid END value")
 			}
 			hasEnd = true
@@ -116,7 +116,7 @@ func parseLine(l string) (key string, field *Field, err error) {
 		}
 	}
 
-	field.Value = parseValue(l)
+	field.Value = FieldValue(l) // take the raw field value
 	return
 }
 
@@ -193,10 +193,7 @@ func parseParamValues(s string) (values []string, more bool, tail string, err er
 		}
 	}
 
-	values = strings.Split(vs, ",")
-	for i, value := range values {
-		values[i] = parseValue(value)
-	}
+	values = FieldValue(vs).Values() // split from the raw value
 	return
 }
 
@@ -218,10 +215,4 @@ func parseQuoted(s string, quote byte) (value, tail string, err error) {
 	}
 	value = string(buf)
 	return
-}
-
-var valueParser = strings.NewReplacer("\\\\", "\\", "\\n", "\n", "\\,", ",")
-
-func parseValue(s string) string {
-	return valueParser.Replace(s)
 }

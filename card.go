@@ -146,7 +146,7 @@ func (c Card) Preferred(k string) *Field {
 
 // Value returns the first field value of the card for the given property. If
 // there is no such field, it returns an empty string.
-func (c Card) Value(k string) string {
+func (c Card) Value(k string) FieldValue {
 	f := c.Get(k)
 	if f == nil {
 		return ""
@@ -156,18 +156,18 @@ func (c Card) Value(k string) string {
 
 // AddValue adds the k, v pair to the list of field values. It appends to any
 // existing values.
-func (c Card) AddValue(k, v string) {
+func (c Card) AddValue(k string, v FieldValue) {
 	c.Add(k, &Field{Value: v})
 }
 
 // SetValue sets the field k to the single value v. It replaces any existing
 // value.
-func (c Card) SetValue(k, v string) {
+func (c Card) SetValue(k string, v FieldValue) {
 	c.Set(k, &Field{Value: v})
 }
 
 // PreferredValue returns the preferred field value of the card.
-func (c Card) PreferredValue(k string) string {
+func (c Card) PreferredValue(k string) FieldValue {
 	f := c.Preferred(k)
 	if f == nil {
 		return ""
@@ -176,13 +176,13 @@ func (c Card) PreferredValue(k string) string {
 }
 
 // Values returns a list of values for a given property.
-func (c Card) Values(k string) []string {
+func (c Card) Values(k string) []FieldValue {
 	fields := c[k]
 	if fields == nil {
 		return nil
 	}
 
-	values := make([]string, len(fields))
+	values := make([]FieldValue, len(fields))
 	for i, f := range fields {
 		values[i] = f.Value
 	}
@@ -192,7 +192,7 @@ func (c Card) Values(k string) []string {
 // Kind returns the kind of the object represented by this card. If it isn't
 // specified, it returns the default: KindIndividual.
 func (c Card) Kind() Kind {
-	kind := strings.ToLower(c.Value(FieldKind))
+	kind := strings.ToLower(c.Value(FieldKind).String())
 	if kind == "" {
 		return KindIndividual
 	}
@@ -201,7 +201,7 @@ func (c Card) Kind() Kind {
 
 // SetKind sets the kind of the object represented by this card.
 func (c Card) SetKind(kind Kind) {
-	c.SetValue(FieldKind, string(kind))
+	c.SetValue(FieldKind, NewFieldValue(string(kind)))
 }
 
 // FormattedNames returns formatted names of the card. The length of the result
@@ -251,7 +251,7 @@ func (c Card) SetName(name *Name) {
 // Gender returns this card's gender.
 func (c Card) Gender() (sex Sex, identity string) {
 	v := c.Value(FieldGender)
-	parts := strings.SplitN(v, ";", 2)
+	parts := strings.SplitN(v.String(), ";", 2)
 	return Sex(strings.ToUpper(parts[0])), maybeGet(parts, 1)
 }
 
@@ -261,7 +261,7 @@ func (c Card) SetGender(sex Sex, identity string) {
 	if identity != "" {
 		v += ";" + identity
 	}
-	c.SetValue(FieldGender, v)
+	c.SetValue(FieldGender, NewFieldValue(v))
 }
 
 // Addresses returns addresses of the card.
@@ -300,17 +300,17 @@ func (c Card) SetAddress(address *Address) {
 
 // Categories returns category information about the card, also known as "tags".
 func (c Card) Categories() []string {
-	return strings.Split(c.PreferredValue(FieldCategories), ",")
+	return c.PreferredValue(FieldCategories).Values()
 }
 
 // SetCategories sets category information about the card.
 func (c Card) SetCategories(categories []string) {
-	c.SetValue(FieldCategories, strings.Join(categories, ","))
+	c.SetValue(FieldCategories, NewFieldValue(categories...))
 }
 
 // Revision returns revision information about the current card.
 func (c Card) Revision() (time.Time, error) {
-	rev := c.Value(FieldRevision)
+	rev := c.Value(FieldRevision).String()
 	if rev == "" {
 		return time.Time{}, nil
 	}
@@ -319,14 +319,72 @@ func (c Card) Revision() (time.Time, error) {
 
 // SetRevision sets revision information about the current card.
 func (c Card) SetRevision(t time.Time) {
-	c.SetValue(FieldRevision, t.Format(timestampLayout))
+	c.SetValue(FieldRevision, NewFieldValue(t.Format(timestampLayout)))
 }
 
 // A field contains a value and some parameters.
 type Field struct {
-	Value  string
+	Value  FieldValue
 	Params Params
 	Group  string
+}
+
+// FieldValue contains the raw field value.
+// Use [NewFieldValue] to construct a properly escaped field value.
+type FieldValue string
+
+var valueFormatter = strings.NewReplacer("\\", "\\\\", "\n", "\\n", ",", "\\,")
+var valueParser = strings.NewReplacer("\\\\", "\\", "\\n", "\n", "\\,", ",")
+
+// NewFieldValue creates a new FieldValue after
+// escaping each part (backslash, newline, comma)
+func NewFieldValue(parts ...string) FieldValue {
+	for i := range parts {
+		parts[i] = valueFormatter.Replace(parts[i])
+	}
+	return FieldValue(strings.Join(parts, ","))
+}
+
+// String returns the raw value of the field
+func (fv FieldValue) String() string {
+	return string(fv)
+}
+
+// Values returns the field value parts, split by comma (each part being unescaped).
+// Guaranteed to have a len > 0
+func (fv FieldValue) Values() []string {
+	parts := stringsSplitUnescaped(string(fv), ',')
+	for i := range parts {
+		parts[i] = valueParser.Replace(parts[i])
+	}
+	return parts
+}
+
+// stringsSplitUnescaped splits the string when "sep" is NOT escaped
+// (i.e. not precedeed by a[n unescaped] backslash)
+func stringsSplitUnescaped(s string, sep rune) []string {
+	n := strings.Count(s, string(sep))
+	if n <= 0 {
+		return []string{s}
+	}
+	ss := make([]string, 0, n) // might not be full if some sep are escaped
+	escaping := false
+	i := 0
+	for j, c := range s {
+		if escaping {
+			escaping = false
+			continue
+		}
+		switch c {
+		case '\\':
+			escaping = true
+		case sep:
+			ss = append(ss, s[i:j])
+			i = j + 1
+		}
+	}
+	ss = append(ss, s[i:])
+	return ss[:len(ss):len(ss)] // clip the slice
 }
 
 // Params is a set of field parameters.
@@ -435,7 +493,7 @@ type Name struct {
 }
 
 func newName(field *Field) *Name {
-	components := strings.Split(field.Value, ";")
+	components := strings.Split(field.Value.String(), ";")
 	return &Name{
 		field,
 		maybeGet(components, 0),
@@ -450,13 +508,13 @@ func (n *Name) field() *Field {
 	if n.Field == nil {
 		n.Field = new(Field)
 	}
-	n.Field.Value = strings.Join([]string{
+	n.Field.Value = NewFieldValue(strings.Join([]string{
 		n.FamilyName,
 		n.GivenName,
 		n.AdditionalName,
 		n.HonorificPrefix,
 		n.HonorificSuffix,
-	}, ";")
+	}, ";"))
 	return n.Field
 }
 
@@ -486,7 +544,7 @@ type Address struct {
 }
 
 func newAddress(field *Field) *Address {
-	components := strings.Split(field.Value, ";")
+	components := strings.Split(field.Value.String(), ";")
 	return &Address{
 		field,
 		maybeGet(components, 0),
@@ -503,7 +561,7 @@ func (a *Address) field() *Field {
 	if a.Field == nil {
 		a.Field = new(Field)
 	}
-	a.Field.Value = strings.Join([]string{
+	a.Field.Value = NewFieldValue(strings.Join([]string{
 		a.PostOfficeBox,
 		a.ExtendedAddress,
 		a.StreetAddress,
@@ -511,6 +569,6 @@ func (a *Address) field() *Field {
 		a.Region,
 		a.PostalCode,
 		a.Country,
-	}, ";")
+	}, ";"))
 	return a.Field
 }
