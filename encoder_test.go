@@ -56,3 +56,80 @@ func TestFormatValue(t *testing.T) {
 		}
 	}
 }
+
+func TestEncoderDeterminism(t *testing.T) {
+	card := Card{
+		"first-key": []*Field{
+			{
+				Value: "value-a",
+				Params: map[string][]string{
+					"p-i":   {"s", "ss", "sss"},
+					"p-ii":  {"s", "ss", "sss"},
+					"p-iii": {"s", "ss", "sss"},
+					"p-iv":  {"sss", "ss", "s"},
+				},
+				Group: "",
+			},
+			{
+				Value: "value-B",
+				Params: map[string][]string{
+					"p-i":   {"t", "tt", "ttt"},
+					"p-ii":  {"t", "tt", "ttt"},
+					"p-iii": {"t", "tt", "ttt"},
+					"p-iv":  {"ttt", "tt", "t"},
+				},
+				Group: "",
+			},
+			{
+				Value:  "VALUE-C",
+				Params: map[string][]string{},
+				Group:  "",
+			},
+		},
+		"second-KEY": []*Field{
+
+			{
+				Value: "value-a\\,b",
+				Params: map[string][]string{
+					"p-i":   {"s", "ss", "sss"},
+					"p-ii":  {"s", "ss", "sss"},
+					"p-iii": {"s", "ss", "sss"},
+					"p-iv":  {"sss", "ss", "s"},
+				},
+				Group: "G1",
+			},
+			{
+				Value: "value-B\\1,2",
+				Params: map[string][]string{
+					"p-i":   {"t", "tt", "ttt"},
+					"p-ii":  {"t", "tt", "ttt"},
+					"p-iii": {"t", "tt", "ttt"},
+					"p-iv":  {"ttt", "tt", "t"},
+				},
+				Group: "GG",
+			},
+			{
+				Value:  "VALUE-C,1,2",
+				Params: map[string][]string{},
+				Group:  "",
+			},
+		},
+		"THIRD-KEY": []*Field{},
+	}
+	ToV4(card)
+	var b bytes.Buffer
+	if err := NewEncoder(&b).Encode(card); err != nil {
+		t.Fatal("Expected no error when formatting card, got:", err)
+	}
+	canonical := b.String()
+
+	for i := 0; i < 100; i++ {
+		b.Reset()
+		if err := NewEncoder(&b).Encode(card); err != nil {
+			t.Fatal("Expected no error when formatting card, got:", err)
+		}
+		if b.String() != canonical {
+			t.Fatalf("Encode: expected canonical %q, got %q", canonical, b.String())
+		}
+	}
+}
