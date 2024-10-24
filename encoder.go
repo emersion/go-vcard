@@ -5,6 +5,7 @@ import (
 	"io"
 	"sort"
 	"strings"
+	"unicode/utf8"
 )
 
 // An Encoder formats cards.
@@ -69,6 +70,33 @@ func formatLine(key string, field *Field) string {
 	}
 
 	s += ":" + formatValue(field.Value)
+
+	// Content lines SHOULD be folded to a maximum width of 75 octets, excluding the line break.
+	const maxLen = 74 // -1 for the leading space on the new line
+	if newlines := (len(s) - 2) / maxLen; newlines > 0 {
+		var sb strings.Builder
+		sb.Grow(len(s) + newlines*len("\r\n "))
+		end := 1 + maxLen
+		for !utf8.RuneStart(s[end]) { // Multi-octet characters MUST remain contiguous.
+			end--
+		}
+		sb.WriteString(s[:end])
+		start := end
+		for start < len(s) {
+			sb.WriteString("\r\n ")
+			end := start + maxLen
+			if end > len(s) {
+				end = len(s)
+			} else {
+				for !utf8.RuneStart(s[end]) { // Multi-octet characters MUST remain contiguous.
+					end--
+				}
+			}
+			sb.WriteString(s[start:end])
+			start = end
+		}
+		return sb.String()
+	}
 	return s
 }
 
