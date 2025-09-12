@@ -427,11 +427,11 @@ const (
 type Name struct {
 	*Field
 
-	FamilyName      string
-	GivenName       string
-	AdditionalName  string
-	HonorificPrefix string
-	HonorificSuffix string
+	FamilyName      string `json:"familyName"`
+	GivenName       string `json:"givenName"`
+	AdditionalName  string `json:"additionalName"`
+	HonorificPrefix string `json:"honorificPrefix"`
+	HonorificSuffix string `json:"honorificSuffix"`
 }
 
 func newName(field *Field) *Name {
