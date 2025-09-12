@@ -476,13 +476,13 @@ const (
 type Address struct {
 	*Field
 
-	PostOfficeBox   string
-	ExtendedAddress string // e.g., apartment or suite number
-	StreetAddress   string
-	Locality        string // e.g., city
-	Region          string // e.g., state or province
-	PostalCode      string
-	Country         string
+	PostOfficeBox   string `json:"postOfficeBox"`
+	ExtendedAddress string `json:"extendedAddress"` // e.g., apartment or suite number
+	StreetAddress   string `json:"streetAddress"`
+	Locality        string `json:"locality"` // e.g., city
+	Region          string `json:"region"`   // e.g., state or province
+	PostalCode      string `json:"postalCode"`
+	Country         string `json:"country"`
 }
 
 func newAddress(field *Field) *Address {
