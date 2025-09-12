@@ -324,9 +324,9 @@ func (c Card) SetRevision(t time.Time) {
 
 // A field contains a value and some parameters.
 type Field struct {
-	Value  string
-	Params Params
-	Group  string
+	Value  string `json:"value"`
+	Params Params `json:"params"`
+	Group  string `json:"group"`
 }
 
 // Params is a set of field parameters.
