@@ -73,7 +73,13 @@ func formatLine(key string, field *Field) string {
 		}
 	}
 
-	s += ":" + formatValue(field.Value)
+	if isStructuredValue(key) {
+		// The value is already escaped per component (RFC 6350 section 3.4);
+		// its ';' separators must stay literal.
+		s += ":" + field.Value
+	} else {
+		s += ":" + formatValue(field.Value)
+	}
 	return s
 }
 
