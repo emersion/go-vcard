@@ -27,12 +27,15 @@ func (dec *Decoder) readLine() (string, error) {
 		return l, err
 	}
 
+	var sb strings.Builder
+	sb.WriteString(l)
+
 	for {
 		next, err := dec.r.Peek(1)
 		if err == io.EOF {
 			break
 		} else if err != nil {
-			return l, err
+			return sb.String(), err
 		}
 
 		if ch := next[0]; ch != ' ' && ch != '\t' {
@@ -40,17 +43,17 @@ func (dec *Decoder) readLine() (string, error) {
 		}
 
 		if _, err := dec.r.Discard(1); err != nil {
-			return l, err
+			return sb.String(), err
 		}
 
 		folded, err := dec.r.ReadString('\n')
 		if err != nil {
-			return l, err
+			return sb.String(), err
 		}
-		l += strings.TrimRight(folded, "\r\n")
+		sb.WriteString(strings.TrimRight(folded, "\r\n"))
 	}
 
-	return l, nil
+	return sb.String(), nil
 }
 
 // Decode parses a single card.

@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 )
 
 // RFC
@@ -126,6 +127,41 @@ func TestDecoder_invalid(t *testing.T) {
 		if _, err := dec.Decode(); err == nil {
 			t.Fatalf("Expected error when decoding invalid card:\n%v", test)
 		}
+	}
+}
+
+// A single logical line may be split into an unbounded number of folded
+// continuation lines. Accumulating them must not take time quadratic in the
+// input size, otherwise a modestly sized card can pin a CPU for a long time.
+func TestDecoder_manyFoldedLines(t *testing.T) {
+	const n = 500000
+	var b strings.Builder
+	b.WriteString("BEGIN:VCARD\nNOTE:")
+	for i := 0; i < n; i++ {
+		b.WriteString("\n a")
+	}
+	b.WriteString("\nEND:VCARD\n")
+
+	done := make(chan struct{})
+	var card Card
+	var err error
+	go func() {
+		dec := NewDecoder(strings.NewReader(b.String()))
+		card, err = dec.Decode()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+	case <-time.After(15 * time.Second):
+		t.Fatal("decoding a heavily folded card did not finish in time")
+	}
+
+	if err != nil {
+		t.Fatal("Expected no error when decoding folded card, got:", err)
+	}
+	if got := card.Value("NOTE"); len(got) != n {
+		t.Errorf("unexpected folded NOTE length: got %d, want %d", len(got), n)
 	}
 }
 
