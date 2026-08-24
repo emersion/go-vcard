@@ -119,7 +119,13 @@ func parseLine(l string) (key string, field *Field, err error) {
 		}
 	}
 
-	field.Value = parseValue(l)
+	if isStructuredValue(key) {
+		// Keep the raw value; its components are unescaped on access, splitting
+		// on unescaped ';' (RFC 6350 section 3.4).
+		field.Value = l
+	} else {
+		field.Value = parseValue(l)
+	}
 	return
 }
 

@@ -94,6 +94,54 @@ func maybeGet(l []string, i int) string {
 	return ""
 }
 
+// isStructuredValue reports whether a property's value is a list of components
+// separated by ';', each escaped per RFC 6350 section 3.4.
+func isStructuredValue(key string) bool {
+	switch strings.ToUpper(key) {
+	case FieldName, FieldAddress:
+		return true
+	}
+	return false
+}
+
+// structuredValueEscaper escapes a single structured-value component
+// (RFC 6350 section 3.4): backslash first so it doesn't double-escape the rest.
+var structuredValueEscaper = strings.NewReplacer("\\", "\\\\", "\n", "\\n", ",", "\\,", ";", "\\;")
+
+// formatStructuredValue escapes each component and joins them with ';'.
+func formatStructuredValue(components []string) string {
+	escaped := make([]string, len(components))
+	for i, c := range components {
+		escaped[i] = structuredValueEscaper.Replace(c)
+	}
+	return strings.Join(escaped, ";")
+}
+
+// parseStructuredValue splits a structured value on unescaped ';' and unescapes
+// each component. It reverses formatStructuredValue.
+func parseStructuredValue(value string) []string {
+	var components []string
+	var b strings.Builder
+	for i := 0; i < len(value); i++ {
+		switch c := value[i]; {
+		case c == '\\' && i+1 < len(value):
+			if n := value[i+1]; n == 'n' || n == 'N' {
+				b.WriteByte('\n')
+			} else {
+				b.WriteByte(n)
+			}
+			i++
+		case c == ';':
+			components = append(components, b.String())
+			b.Reset()
+		default:
+			b.WriteByte(c)
+		}
+	}
+	components = append(components, b.String())
+	return components
+}
+
 // A Card is an address book entry.
 type Card map[string][]*Field
 
@@ -435,7 +483,7 @@ type Name struct {
 }
 
 func newName(field *Field) *Name {
-	components := strings.Split(field.Value, ";")
+	components := parseStructuredValue(field.Value)
 	return &Name{
 		field,
 		maybeGet(components, 0),
@@ -450,13 +498,13 @@ func (n *Name) field() *Field {
 	if n.Field == nil {
 		n.Field = new(Field)
 	}
-	n.Field.Value = strings.Join([]string{
+	n.Field.Value = formatStructuredValue([]string{
 		n.FamilyName,
 		n.GivenName,
 		n.AdditionalName,
 		n.HonorificPrefix,
 		n.HonorificSuffix,
-	}, ";")
+	})
 	return n.Field
 }
 
@@ -486,7 +534,7 @@ type Address struct {
 }
 
 func newAddress(field *Field) *Address {
-	components := strings.Split(field.Value, ";")
+	components := parseStructuredValue(field.Value)
 	return &Address{
 		field,
 		maybeGet(components, 0),
@@ -503,7 +551,7 @@ func (a *Address) field() *Field {
 	if a.Field == nil {
 		a.Field = new(Field)
 	}
-	a.Field.Value = strings.Join([]string{
+	a.Field.Value = formatStructuredValue([]string{
 		a.PostOfficeBox,
 		a.ExtendedAddress,
 		a.StreetAddress,
@@ -511,6 +559,6 @@ func (a *Address) field() *Field {
 		a.Region,
 		a.PostalCode,
 		a.Country,
-	}, ";")
+	})
 	return a.Field
 }
